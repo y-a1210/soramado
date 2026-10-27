@@ -1,0 +1,2715 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SORAMADO マイクロワールド</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="リスクとリターン、情報の行き先を可視化した研究用の架空OTA（マイクロワールド）">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+/* Layout: ticket-stub plan cards on an airy sky-paper ground; a right-hand "window" rail shows where information goes. */
+:root{
+  --paper:#F2F5F9;
+  --surface:#FFFFFF;
+  --surface-2:#F6F8FB;
+  --ink:#132033;
+  --ink-2:#46556A;
+  --ink-3:#66768C;
+  --line:#D8E0EA;
+  --line-2:#BCC8D8;
+  --brand:#2B4F9E;
+  --brand-ink:#FFFFFF;
+  --brand-soft:#E6EDF9;
+  --sky:#3E8FD0;
+  --hi:#B42318; --hi-bg:#FDECEA; --hi-line:#EFAFA6;
+  --md:#875000; --md-bg:#FDF1D3; --md-line:#E5C474;
+  --lo:#0A6A4B; --lo-bg:#DFF3EA; --lo-line:#98D2B9;
+  --scarce:#C8102E; --scarce-bg:#FFE8EC;
+  --done:#2C6A5C;
+  --backdrop:rgba(12,20,32,.38);
+  --shadow:0 1px 2px rgba(19,32,51,.05),0 6px 18px rgba(19,32,51,.06);
+  --radius:14px;
+  --f-display:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+  --f-body:"BIZ UDPGothic","Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP","Yu Gothic","Meiryo",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1520; --surface:#142030; --surface-2:#18263A; --ink:#E6EDF6; --ink-2:#AAB8CA; --ink-3:#8696AB;
+    --line:#26364B; --line-2:#36495F; --brand:#90B2F3; --brand-ink:#0D1520; --brand-soft:#1C2C47; --sky:#6DB5EC;
+    --hi:#FF9282; --hi-bg:#3A1C18; --hi-line:#6E2E25; --md:#F0C168; --md-bg:#32270F; --md-line:#66521F;
+    --lo:#6ED4A8; --lo-bg:#0F2F22; --lo-line:#225B43; --scarce:#FF7186; --scarce-bg:#3A1620; --done:#82CBB8;
+    --backdrop:rgba(0,0,0,.55);
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1520; --surface:#142030; --surface-2:#18263A; --ink:#E6EDF6; --ink-2:#AAB8CA; --ink-3:#8696AB;
+  --line:#26364B; --line-2:#36495F; --brand:#90B2F3; --brand-ink:#0D1520; --brand-soft:#1C2C47; --sky:#6DB5EC;
+  --hi:#FF9282; --hi-bg:#3A1C18; --hi-line:#6E2E25; --md:#F0C168; --md-bg:#32270F; --md-line:#66521F;
+  --lo:#6ED4A8; --lo-bg:#0F2F22; --lo-line:#225B43; --scarce:#FF7186; --scarce-bg:#3A1620; --done:#82CBB8;
+  --backdrop:rgba(0,0,0,.55);
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--surface)}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.4;margin:0;text-wrap:balance;font-weight:700}
+p{margin:0}
+ul,ol{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono)}
+.muted{color:var(--ink-3)}
+.sr-only{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1 1 auto}
+
+/* ---------- header ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-inner{max-width:1360px;margin:0 auto;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:10px 20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{width:32px;height:32px;flex:0 0 auto}
+.brand-name{font-family:var(--f-display);font-weight:900;letter-spacing:.16em;font-size:17px;line-height:1.1}
+.brand-sub{font-size:11px;color:var(--ink-3);line-height:1.3}
+.task-chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;padding:4px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);white-space:nowrap}
+.task-chip b{font-family:var(--f-display)}
+.wallet{margin-left:auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.wallet .w{display:flex;flex-direction:column;line-height:1.25}
+.wallet .w span{font-size:11px;color:var(--ink-3)}
+.wallet .w b{font-family:var(--f-mono);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.wallet .w b.neg{color:var(--hi)}
+.cond-tag{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);border:1px dashed var(--line-2);border-radius:6px;padding:1px 6px}
+
+/* ---------- shell ---------- */
+.shell{max-width:1360px;margin:0 auto;padding-block:20px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.shell.no-rail{grid-template-columns:minmax(0,1fr)}
+.shell.narrow-main main{max-width:880px}
+main{min-width:0}
+.screen{display:flex;flex-direction:column;gap:16px;min-width:0}
+
+/* stepper (current location) */
+.stepper{list-style:none;padding:0;display:flex;gap:6px;flex-wrap:wrap}
+.stepper li{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px;color:var(--ink-3);line-height:1.3}
+.stepper .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:12px;font-weight:600;background:var(--surface-2);border:1px solid var(--line-2);flex:0 0 auto}
+.stepper li.done{color:var(--ink-2)}
+.stepper li.done .n{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+.stepper li[aria-current="step"]{color:var(--ink);border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand);font-weight:700}
+.stepper li[aria-current="step"] .n{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+
+/* generic panels */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;min-width:0}
+.panel h2{font-size:20px}
+.panel h3{font-size:16px}
+.lead{font-size:16px;color:var(--ink-2)}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--ink-3);font-weight:700}
+.note{font-size:13px;color:var(--ink-2)}
+.callout{border-left:4px solid var(--brand);background:var(--brand-soft);border-radius:0 10px 10px 0;padding:12px 14px;font-size:14px}
+.prose p+p{margin-top:10px}
+.prose ol,.prose ul{padding-left:1.4em}
+
+/* buttons */
+.btn{appearance:none;border:1px solid var(--brand);background:var(--brand);color:var(--brand-ink);font-weight:700;border-radius:10px;padding:10px 18px;cursor:pointer;font-size:14px;line-height:1.35;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;text-align:center}
+.btn:hover{filter:brightness(1.07)}
+.btn.quiet{background:var(--surface);color:var(--ink);border-color:var(--line-2)}
+.btn.quiet:hover{border-color:var(--brand);filter:none}
+.btn.small{min-height:34px;padding:6px 12px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.linkbtn{appearance:none;background:none;border:0;padding:2px 0;color:var(--brand);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-size:13px;display:inline-flex;align-items:center;gap:4px}
+.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.actions .go{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.dest{font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.dest::before{content:"";width:14px;height:14px;flex:0 0 auto;background:var(--ink-3);-webkit-mask:var(--arrow) center/contain no-repeat;mask:var(--arrow) center/contain no-repeat}
+:root{--arrow:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8h10M8 4l4 4-4 4' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+
+/* segmented control */
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{appearance:none;border:0;background:none;padding:7px 12px;font-size:13px;cursor:pointer;border-right:1px solid var(--line);min-height:36px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);font-weight:700}
+
+/* ---------- search summary & sort ---------- */
+.searchbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px}
+.searchbar .route-sum{font-family:var(--f-display);font-weight:700;font-size:17px}
+.searchbar .meta{font-size:13px;color:var(--ink-2)}
+.sortbar{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;font-size:13px}
+.sortbar .lbl{color:var(--ink-3)}
+
+/* C3 profile bar */
+.profile-bar{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;background:var(--brand-soft);border:1px solid var(--brand);border-radius:var(--radius);padding:12px 16px}
+.profile-bar .pb-stage{font-family:var(--f-display);font-weight:700;font-size:16px}
+.profile-bar .pb-text{font-size:13px;color:var(--ink-2);flex:1 1 280px;min-width:0}
+.stage-picker{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.stage-picker label{display:flex;gap:6px;align-items:center;border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer}
+
+/* ---------- plan cards (ticket) ---------- */
+.plans{display:flex;flex-direction:column;gap:14px}
+.plan{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);display:grid;grid-template-columns:minmax(0,1fr) 210px;scroll-margin-top:110px;transition:box-shadow .2s,border-color .2s}
+.plan.hl{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft),var(--shadow)}
+.plan.chosen{border-color:var(--brand)}
+.plan-main{padding:16px 18px 14px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.plan-side{padding:16px 18px 14px;border-left:1px solid var(--line);display:flex;flex-direction:column;align-items:flex-end;gap:8px;text-align:right;min-width:0}
+.plan-head{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap}
+.pid{font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.06em;padding:1px 8px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.prov{font-weight:700;font-size:15px}
+.ptype{font-size:12px;color:var(--ink-3)}
+.fare-name{font-size:12px;padding:0 8px;border-radius:999px;border:1px solid var(--line-2);color:var(--ink-2)}
+.route{display:grid;grid-template-columns:auto minmax(48px,1fr) auto;align-items:center;gap:12px}
+.route .pt{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.route .pt:last-child{text-align:right}
+.route .t{font-family:var(--f-mono);font-size:22px;font-weight:600;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.route .t sup{font-size:11px;font-family:var(--f-body);color:var(--ink-3);margin-left:2px}
+.route .ap{font-size:12px;color:var(--ink-2)}
+.leg{position:relative;text-align:center;font-size:12px;color:var(--ink-3);min-width:0}
+.leg::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid var(--line-2)}
+.leg span{position:relative;background:var(--surface);padding:0 8px;white-space:nowrap}
+.via{font-size:12px;color:var(--ink-2)}
+.room{font-size:13px;color:var(--ink-2)}
+.price{font-family:var(--f-display);font-weight:900;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.price small{display:block;font-family:var(--f-body);font-weight:400;font-size:11px;color:var(--ink-3);margin-top:2px}
+.front-loss{font-size:13px;line-height:1.35}
+.front-loss b{display:block;font-family:var(--f-mono);font-size:17px;color:var(--hi)}
+.front-loss b.zero{color:var(--lo)}
+.scarce{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--scarce);background:var(--scarce-bg);border-radius:6px;padding:1px 8px;white-space:nowrap}
+
+/* stub: the tear-off part that carries the "in case of change" terms */
+.stub{grid-column:1 / -1;position:relative;border-top:2px dashed var(--line-2);padding:12px 18px 14px;background:var(--surface-2);border-radius:0 0 var(--radius) var(--radius);min-width:0}
+.stub::before,.stub::after{content:"";position:absolute;top:-10px;width:18px;height:18px;border-radius:50%;background:var(--paper);border:1px solid var(--line)}
+.stub::before{left:-10px;clip-path:inset(0 0 0 50%)}
+.stub::after{right:-10px;clip-path:inset(0 50% 0 0)}
+.stub-row{display:flex;gap:8px 16px;align-items:center;flex-wrap:wrap}
+.stub-label{font-size:11px;letter-spacing:.08em;color:var(--ink-3);font-weight:700}
+.conds{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px 18px;margin:8px 0 0}
+.conds div{min-width:0}
+.conds dt{font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+.conds dd{margin:0;font-size:13px;font-weight:700;line-height:1.5}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12px;border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:1px 10px;white-space:nowrap}
+
+/* risk and return bars on each card */
+.rrbars{display:grid;grid-template-columns:auto minmax(80px,1fr) auto;gap:6px 10px;align-items:center;margin-top:10px;font-size:12px}
+.rrbars .k{color:var(--ink-2);white-space:nowrap}
+.rrbars .trk{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.rrbars .bar{height:100%;border-radius:5px}
+.rrbars .bar.loss{background:var(--hi);opacity:.78}
+.rrbars .bar.save{background:var(--brand);opacity:.8}
+.rrbars .v{font-family:var(--f-mono);font-weight:600;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.assume{font-size:12px;color:var(--ink-3);margin-top:6px}
+
+/* risk badge (shape + word + colour, never colour alone) */
+.risk{display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid;padding:2px 10px;font-size:12px;font-weight:700;line-height:1.5;white-space:nowrap}
+.risk svg{width:12px;height:12px;flex:0 0 auto}
+.risk.High{color:var(--hi);background:var(--hi-bg);border-color:var(--hi-line)}
+.risk.Med{color:var(--md);background:var(--md-bg);border-color:var(--md-line)}
+.risk.Low{color:var(--lo);background:var(--lo-bg);border-color:var(--lo-line)}
+.risk svg path,.risk svg circle,.risk svg rect{fill:currentColor}
+.emph-S1 .plan-side .risk{font-size:15px;padding:6px 14px;border-width:2px}
+.emph-S1 .plan-side .risk svg{width:15px;height:15px}
+.emph-S1 .plan-side .risk.High{background:var(--hi);color:var(--surface);border-color:var(--hi)}
+.emph-S1 .plan-side .risk.Med{background:var(--md);color:var(--surface);border-color:var(--md)}
+.emph-S1 .plan-side .risk.Low{background:var(--lo);color:var(--surface);border-color:var(--lo)}
+.emph-S2 .plan-side .risk{font-size:14px;padding:4px 12px;border-width:2px}
+.emph-S2 .plan-side .risk svg{width:14px;height:14px}
+.emph-S4 .plan-side .risk{font-size:11px;padding:0 8px;background:transparent}
+
+/* ---------- compare panel ---------- */
+.compare{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px;container-type:inline-size}
+.compare-head{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}
+.compare-head h3{font-size:16px}
+.compare-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;align-items:start;margin-top:10px}
+@container (max-width:780px){.compare-grid{grid-template-columns:minmax(0,1fr)}}
+.tbl-wrap{overflow-x:auto;min-width:0}
+table.ctable{border-collapse:collapse;width:100%;font-size:13px}
+.ctable th,.ctable td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;vertical-align:middle}
+.ctable th{font-size:11px;color:var(--ink-3);font-weight:700;letter-spacing:.04em}
+.ctable td.r,.ctable th.r{text-align:right}
+.ctable td.r{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.ctable tr.hl td{background:var(--brand-soft)}
+.ctable tbody tr{cursor:pointer}
+.rrmap{margin:0;min-width:0}
+.rrmap svg{width:100%;height:auto;display:block}
+.rrmap figcaption{font-size:12px;color:var(--ink-3);margin-top:4px}
+.rrmap .axis{stroke:var(--line-2)}
+.rrmap .grid{stroke:var(--line)}
+.rrmap text{fill:var(--ink-2);font-size:11px;font-family:var(--f-body)}
+.rrmap .tick{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink-3)}
+.rrmap .lab{font-family:var(--f-mono);font-weight:600;font-size:11.5px;fill:var(--ink)}
+.rrmap .frontier{fill:none;stroke:var(--line-2);stroke-dasharray:3 4}
+.rrmap .mk{cursor:pointer}
+.rrmap .mk.High{fill:var(--hi)}
+.rrmap .mk.Med{fill:var(--md)}
+.rrmap .mk.Low{fill:var(--lo)}
+.rrmap .mk.nograde{fill:var(--brand)}
+.rrmap .mk.hl{stroke:var(--ink);stroke-width:2}
+.rrmap .ptg:focus-visible{outline:none}
+.rrmap .ptg:focus-visible .mk{stroke:var(--brand);stroke-width:3}
+
+/* ---------- forms ---------- */
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 18px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:12px;color:var(--ink-2);font-weight:700}
+.field input[type=text]{width:100%;border:1px solid var(--line-2);background:var(--surface-2);border-radius:10px;padding:9px 12px;min-height:42px;font-family:var(--f-mono);font-size:14px}
+.field input[readonly]{cursor:default}
+.field .to{font-size:11.5px;color:var(--ink-3);display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.field .to b{color:var(--brand);font-weight:700}
+.field.focus input{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:12px 16px 16px;margin:0;min-width:0}
+legend{font-family:var(--f-display);font-weight:700;padding:0 6px}
+.check{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:3px;flex:0 0 auto;accent-color:var(--brand)}
+textarea,input[type=text].free{width:100%;border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:9px 12px;min-height:42px}
+
+/* likert */
+.qlist{display:flex;flex-direction:column;gap:10px}
+.lk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.lk.missing{border-color:var(--hi)}
+.lk-q{font-weight:700;margin-bottom:8px;display:flex;gap:8px}
+.lk-q .qn{font-family:var(--f-mono);color:var(--ink-3);font-weight:600;flex:0 0 auto}
+.lk-scale{display:grid;grid-template-columns:repeat(var(--n,7),minmax(0,1fr));gap:6px}
+.lk-scale label{position:relative;display:block}
+.lk-scale input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.lk-scale span{display:grid;place-items:center;height:40px;border:1px solid var(--line-2);border-radius:8px;font-family:var(--f-mono);font-weight:600;background:var(--surface);cursor:pointer}
+.lk-scale input:checked+span{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.lk-scale input:focus-visible+span{outline:3px solid var(--brand);outline-offset:2px}
+.lk-anchors{display:flex;justify-content:space-between;gap:12px;font-size:11.5px;color:var(--ink-3);margin-top:4px}
+.opt-list{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--line-2);border-radius:10px;padding:8px 12px;cursor:pointer;background:var(--surface)}
+.opt input{width:18px;height:18px;margin:0;accent-color:var(--brand);flex:0 0 auto}
+.opt:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.vas{display:flex;flex-direction:column;gap:6px}
+.vas input[type=range]{width:100%;accent-color:var(--brand)}
+.vas.untouched input[type=range]::-webkit-slider-thumb{opacity:.25}
+.vas .vas-val{font-family:var(--f-mono);font-weight:600}
+.err{color:var(--hi);font-size:13px;font-weight:700}
+
+/* ---------- drawer (fare rules) ---------- */
+.backdrop{position:fixed;inset:0;background:var(--backdrop);z-index:50}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--surface);z-index:51;box-shadow:-12px 0 32px rgba(0,0,0,.2);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px)}
+.drawer-head{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+.drawer-head h2{font-size:17px}
+.drawer-body{padding:16px 18px 24px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.rules{width:100%;border-collapse:collapse;font-size:13px}
+.rules th,.rules td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+.rules th{width:34%;color:var(--ink-2);font-weight:700}
+.prov-line{font-size:12px;color:var(--ink-3);border-top:1px dashed var(--line-2);padding-top:10px}
+
+/* ---------- rail: where information goes ---------- */
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px);max-height:calc(100vh - 104px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.rail-top{display:flex;align-items:center;gap:8px}
+.rail-top h2{font-size:15px}
+.rail-top .live{margin-left:auto;font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.rail-top .live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--sky);box-shadow:0 0 0 3px color-mix(in srgb,var(--sky) 25%,transparent)}
+.rail-toggle{display:none;appearance:none;border:0;background:none;padding:0;cursor:pointer;width:100%;text-align:left;align-items:center;gap:10px}
+.rail-body{display:flex;flex-direction:column;gap:12px}
+.rail h3{font-size:11.5px;color:var(--ink-3);font-family:var(--f-body);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+.here-box{font-size:13px}
+.here-box b{font-family:var(--f-display)}
+.next-box{background:var(--brand-soft);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6;min-height:3.4em}
+.next-box .who{font-weight:700;color:var(--brand)}
+.flow-svg{width:100%;height:auto;display:block}
+.flow-svg .box{fill:var(--surface);stroke:var(--line-2);stroke-width:1.2}
+.flow-svg .node.on .box{stroke:var(--brand);stroke-width:2;fill:var(--brand-soft)}
+.flow-svg .node.recv .box{stroke:var(--done);stroke-width:1.6}
+.flow-svg .node.off{opacity:.42}
+.flow-svg .nm{font-size:11.5px;font-weight:700;fill:var(--ink);font-family:var(--f-body)}
+.flow-svg .rl{font-size:10px;fill:var(--ink-3);font-family:var(--f-body)}
+.flow-svg .edge{fill:none;stroke:var(--line-2);stroke-width:1.4}
+.flow-svg .edge.active{stroke:var(--brand);stroke-width:2.2}
+.flow-svg .edge.pending{stroke:var(--brand);stroke-width:1.8;stroke-dasharray:5 4}
+.flow-svg .edge.done{stroke:var(--done);stroke-width:1.8}
+.flow-svg .dot{fill:var(--sky)}
+.flow-svg .ah{fill:var(--line-2)}
+.flow-svg .ah.active,.flow-svg .ah.pending{fill:var(--brand)}
+.flow-svg .ah.done{fill:var(--done)}
+.flow-now{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.flow-now li{display:flex;gap:8px;align-items:baseline}
+.flow-now li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--sky);flex:0 0 auto;transform:translateY(-1px)}
+.flow-now .what{font-weight:700}
+.receipt{width:100%;border-collapse:collapse;font-size:12px}
+.receipt th,.receipt td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+.receipt th{font-size:11px;color:var(--ink-3);font-weight:700}
+.receipt tr.foc td{background:var(--brand-soft)}
+.status{display:inline-block;font-size:11px;border-radius:999px;padding:0 8px;border:1px solid var(--line-2);white-space:nowrap;line-height:1.7}
+.status.sent{color:var(--done);border-color:var(--done)}
+.status.pending{color:var(--brand);border-color:var(--brand)}
+.status.unsent{color:var(--ink-3)}
+.status.off{color:var(--ink-3);border-style:dashed}
+.labnote{font-size:12px;color:var(--ink-2);border-top:1px dashed var(--line-2);padding-top:10px;display:flex;gap:8px}
+.labnote::before{content:"";width:8px;height:8px;margin-top:6px;border-radius:2px;background:var(--ink-3);flex:0 0 auto}
+
+@media (max-width:1099px){
+  .shell{grid-template-columns:minmax(0,1fr);padding-bottom:112px}
+  .rail{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:35;max-height:76vh;border-radius:16px 16px 0 0;border-bottom:0;box-shadow:0 -8px 28px rgba(12,20,32,.18);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+  .rail:not(.open) .rail-body,.rail:not(.open) .rail-top{display:none}
+  .rail-toggle{display:flex}
+  .rail.open .rail-toggle{padding-bottom:6px;border-bottom:1px solid var(--line)}
+}
+.rail-toggle .rt-title{font-family:var(--f-display);font-weight:700;font-size:14px;white-space:nowrap}
+.rail-toggle .rt-now{font-size:12px;color:var(--ink-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto}
+.rail-toggle .rt-chev{font-size:12px;color:var(--brand);font-weight:700;white-space:nowrap}
+
+/* ---------- microworld timeline ---------- */
+.tl{position:relative;height:96px;margin:8px 14px 0}
+.tl-track{position:absolute;left:0;right:0;top:44px;height:4px;background:var(--line);border-radius:2px}
+.tl-fill{position:absolute;left:0;top:44px;height:4px;background:var(--brand);border-radius:2px;width:0;transition:width 1.6s linear}
+.tl-mark{position:absolute;top:32px;left:0;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:var(--surface);border:3px solid var(--brand);transition:left 1.6s linear;display:grid;place-items:center}
+.tl-mark::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand)}
+.tl-tick{position:absolute;top:58px;transform:translateX(-50%);font-size:11.5px;color:var(--ink-3);white-space:nowrap;text-align:center;line-height:1.3}
+.tl-tick::before{content:"";display:block;width:2px;height:8px;background:var(--line-2);margin:0 auto 4px}
+.tl-flag{position:absolute;top:0;transform:translateX(-50%);font-size:11.5px;font-weight:700;white-space:nowrap;padding:2px 8px;border-radius:6px;border:1px dashed var(--md-line);color:var(--md);background:var(--md-bg)}
+.tl-tick.first{transform:none}
+.tl-tick.first::before{margin:0 0 4px}
+.tl-tick.last{transform:translateX(-100%);text-align:right}
+.tl-tick.last::before{margin:0 0 4px auto}
+.outcome{border-radius:12px;padding:16px 18px;border:2px solid var(--md-line);background:var(--md-bg)}
+.outcome.ok{border-color:var(--lo-line);background:var(--lo-bg)}
+.outcome .ot{font-family:var(--f-display);font-weight:700;font-size:17px}
+.outcome-rows{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 16px;margin-top:12px;font-size:14px}
+.outcome-rows dt{color:var(--ink-2)}
+.outcome-rows dd{margin:0;font-weight:700}
+.outcome-rows dd.money{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* ---------- summary ---------- */
+.sumtable{width:100%;border-collapse:collapse;font-size:14px}
+.sumtable th,.sumtable td{border-bottom:1px solid var(--line);padding:8px;text-align:left;white-space:nowrap}
+.sumtable td.r,.sumtable th.r{text-align:right;font-family:var(--f-mono)}
+.bignum{font-family:var(--f-display);font-weight:900;font-size:34px;line-height:1.1;font-variant-numeric:tabular-nums}
+.codebox{font-family:var(--f-mono);font-size:22px;font-weight:600;letter-spacing:.08em;padding:8px 14px;border:2px dashed var(--brand);border-radius:10px;display:inline-block;user-select:all}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kv .k{font-size:12px;color:var(--ink-3)}
+
+/* ---------- lab panel ---------- */
+.lab-fab{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:45;appearance:none;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px}
+.lab-fab .cond-tag{border-style:solid}
+@media (max-width:1099px){.lab-fab{bottom:calc(76px + env(safe-area-inset-bottom,0px))}}
+.lab{position:fixed;top:0;left:0;bottom:0;width:min(600px,100%);background:var(--surface);z-index:61;overflow:auto;box-shadow:12px 0 32px rgba(0,0,0,.22);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px)}
+.lab-backdrop{position:fixed;inset:0;background:var(--backdrop);z-index:60}
+.lab-head{position:sticky;top:0;background:var(--surface);display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);z-index:1}
+.lab-head h2{font-size:17px}
+.lab-body{padding:16px 18px 32px;display:flex;flex-direction:column;gap:18px}
+.lab section{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.lab h3{font-size:14px}
+.lab label.ctl{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;font-size:13px}
+.lab label.ctl>span:first-child{min-width:140px;color:var(--ink-2)}
+.lab input[type=text],.lab input[type=number],.lab select{border:1px solid var(--line-2);background:var(--surface-2);border-radius:8px;padding:6px 10px;min-height:36px;font-size:13px;min-width:0}
+.lab input.wide{flex:1 1 220px}
+.lab textarea.out{width:100%;min-height:160px;font-family:var(--f-mono);font-size:11.5px;line-height:1.5;background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;padding:8px;resize:vertical}
+.lab .mini{font-size:12px;color:var(--ink-3)}
+.lab .tbl-wrap table{border-collapse:collapse;font-size:12px;width:100%}
+.lab .tbl-wrap th,.lab .tbl-wrap td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:13px;z-index:80;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+
+/* demo launcher on the welcome screen */
+.demo{border:1px dashed var(--brand);border-radius:var(--radius);padding:16px 18px;background:var(--surface);display:flex;flex-direction:column;gap:12px}
+.demo .row>span:first-child{font-size:13px;color:var(--ink-2);min-width:120px}
+
+@media (max-width:640px){
+  .plan{grid-template-columns:minmax(0,1fr)}
+  .plan-side{border-left:0;border-top:1px solid var(--line);flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;text-align:left}
+  .route .t{font-size:19px}
+  .price{font-size:22px}
+  .wallet{margin-left:0;width:100%}
+  .lk-scale span{height:36px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+
+/* ---------- additions: welcome, consent, brief ---------- */
+.shell.no-rail main{max-width:960px;width:100%;margin:0 auto}
+.mw-steps{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;counter-reset:mw}
+.mw-steps li{counter-increment:mw;display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:12px;padding:12px 14px 12px 48px;position:relative;background:var(--surface-2);min-width:0}
+.mw-steps li::before{content:counter(mw);position:absolute;left:14px;top:12px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:13px;background:var(--brand);color:var(--brand-ink)}
+.mw-steps b{font-family:var(--f-display)}
+.mw-steps span{font-size:13px;color:var(--ink-2)}
+.consent-list{display:grid;gap:10px;margin:0}
+.consent-list div{display:grid;grid-template-columns:9.5em minmax(0,1fr);gap:4px 14px}
+.consent-list dt{font-weight:700;color:var(--ink-2)}
+.consent-list dd{margin:0}
+@media (max-width:560px){.consent-list div{grid-template-columns:minmax(0,1fr)}}
+.brief h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.brief-date{font-family:var(--f-body);font-weight:400;font-size:15px;color:var(--ink-2)}
+.rail .tbl-wrap{overflow-x:auto}
+.plan-side .btn{margin-top:auto}
+.plan.chosen .plan-side{justify-content:flex-start}
+.rrmap .ptg{outline:none}
+.rrmap .ptg:hover .mk{stroke:var(--ink);stroke-width:1.5}
+.compare .assume{margin-top:0}
+[hidden]{display:none!important}
+.ctable .gcell{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.gmark{display:inline-grid;place-items:center;width:14px;height:14px}
+.gmark svg{width:12px;height:12px}
+.gmark svg path,.gmark svg circle{fill:currentColor}
+.gmark.High{color:var(--hi)} .gmark.Med{color:var(--md)} .gmark.Low{color:var(--lo)}
+.gword{font-size:11px;color:var(--ink-3)}
+.receipt td.it{min-width:7em;word-break:keep-all;overflow-wrap:break-word}
+.receipt td.it .status{display:inline-block;margin-top:3px}
+.receipt td.it b{display:block}
+.receipt td.to{word-break:keep-all;overflow-wrap:break-word}
+.ctable td.wrap{white-space:normal;min-width:5.5em;line-height:1.45}
+.top.narrow .top-inner{max-width:992px}
+body.rail-open .lab-fab{display:none}
+@media (max-width:1099px){.rail .rail-top{display:none}}
+@media (max-width:640px){
+  .top{position:static}
+  .brand-sub{display:none}
+  .top-inner{gap:6px 12px;padding-block:8px}
+  .wallet .w b{font-size:14px}
+  .stepper li:not([aria-current="step"]){font-size:0;padding:4px;gap:0}
+  .stepper li:not([aria-current="step"]) .n{font-size:12px}
+  .lab-fab .lab-fab-text{display:none}
+  .lab-fab{padding:6px 8px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top" id="top"></header>
+  <div class="shell" id="shell">
+    <main id="main" tabindex="-1"></main>
+    <aside class="rail" id="rail" aria-label="情報の行き先"></aside>
+  </div>
+  <div id="drawer-root"></div>
+  <div id="lab-root"></div>
+  <div id="toast-root"></div>
+  <div class="sr-only" id="live" aria-live="polite"></div>
+</div>
+<noscript><p style="padding:24px">このページの表示にはJavaScriptが必要です。</p></noscript>
+<script>
+(function () {
+'use strict';
+try { document.documentElement.lang = 'ja'; } catch (e) {}
+/* ============================================================
+   data.js — stimuli, items and texts (Study 3 v1.0 に準拠)
+   出典：Study3_質問紙・測定項目一覧.xlsx（3_事前質問, 4_刺激材料,
+         5_理解度クイズ, 6_攪乱イベント, 7_事後質問, 2_同意文面, 9_デブリーフ文面）
+   ============================================================ */
+const APP_VERSION = '1.0.0';
+
+/* 研究者が既定値を変えるときはここを編集（URLパラメータ・研究者パネルでも上書き可） */
+const DEFAULT_CONFIG = {
+  mode: 'demo',          // 'demo'（研究者・指導教員向け） | 'exp'（参加者向け）
+  condition: 'C3',       // C1 従来型 / C2 一律段階表示 / C3 リスク許容度適応表示
+  latinOrder: 'A',       // A: 国内→国際→ホテル / B: 国際→ホテル→国内 / C: ホテル→国内→国際
+  flowPanel: true,       // 「情報の行き先」パネル（全条件共通）
+  rrMap: true,           // リスク・リターン図（C2・C3）
+  lossSource: 'rules',   // 'rules'＝取消・変更条件とイベント時点から計算 / 'sheet'＝刺激材料シートの損失列
+  pEvent: 0.25,          // 予定変更イベントの発生確率（各課題）
+  lmax: 219990,          // 最大想定損失（7,790＋198,000＋14,200）
+  bonusMax: 300,         // ボーナス上限（円）
+  cutoffs: [2.75, 3.35, 4.00], // 許容度段階 S1|S2|S3|S4 の境界（仮値：パイロットの四分位で更新）
+  stageOverride: '',     // C3の段階を固定する場合 'S1'〜'S4'
+  minWidth: 768,         // 画面幅の下限（除外基準E6）
+  endpoint: '',          // ログ送信先URL（例：Google Apps ScriptのWebアプリ）
+  postSurveyUrl: '',     // 事後アンケートのURL（?pid= を付けて開く）
+  showConsent: true,
+  showProfile: true,
+  showPractice: true,
+  lab: false,            // 実験モードでも研究者パネルを出す
+};
+
+const LATIN = { A: ['DOM', 'INT', 'HOTEL'], B: ['INT', 'HOTEL', 'DOM'], C: ['HOTEL', 'DOM', 'INT'] };
+
+const CONDITIONS = {
+  C1: { name: 'C1', label: '従来型', desc: '価格中心。取消・変更条件は詳細画面のみ。希少性表示あり（現行OTAの再現）。' },
+  C2: { name: 'C2', label: '一律段階表示', desc: '全プランに同じ大きさのリスク表示。条件・想定損失を一覧に表示し、比較表・図を表示。' },
+  C3: { name: 'C3', label: '適応表示', desc: 'リスク許容度の段階に合わせて、並び順・強調・折りたたみを調整。段階は画面上部に表示し、手動で変更できる。' },
+};
+
+const STAGES = {
+  S1: { name: 'S1', label: '安心重視', desc: '予定変更時の損失をできるだけ避けたい' },
+  S2: { name: 'S2', label: 'やや安心重視', desc: '価格も見つつ、損失を避けることを優先しやすい' },
+  S3: { name: 'S3', label: 'やや価格重視', desc: '条件も見つつ、価格の安さを優先しやすい' },
+  S4: { name: 'S4', label: '価格重視', desc: '多少のリスクがあっても安さを優先しやすい' },
+};
+
+/* 整合性スコア行列（手順書 7.3 節・事前登録） */
+const ALIGN = {
+  S1: { Low: 1.00, Med: 0.50, High: 0.00 },
+  S2: { Low: 0.75, Med: 1.00, High: 0.25 },
+  S3: { Low: 0.25, Med: 1.00, High: 0.75 },
+  S4: { Low: 0.00, Med: 0.50, High: 1.00 },
+};
+const GRADE_ORDER = { Low: 0, Med: 1, High: 2 };
+
+/* ---------- 事前質問（リスク許容度：DOSPERT金融6・レク6＋注意チェック＋旅行6） ---------- */
+const PROFILE_INTRO = '以下の行動を、あなたが実際に行う可能性はどの程度ですか。最も当てはまる番号を選んでください。';
+const L7_ANCHORS = ['1 = 絶対にしない', '7 = 必ずする'];
+const PROFILE_ITEMS = [
+  { id: 'DF1', sec: 'fin', text: '収入の10%を、値動きの大きい株式に投資する' },
+  { id: 'DF2', sec: 'fin', text: '1日分の収入を、スポーツの試合の結果への賭けに使う' },
+  { id: 'DF3', sec: 'fin', text: '収入の5%を、成功するか分からない新しい事業に出資する' },
+  { id: 'DF4', sec: 'fin', text: '1日分の収入を、カジノのゲームに使う' },
+  { id: 'DF5', sec: 'fin', text: '収入の10%を、設立間もない成長企業の株式に投資する' },
+  { id: 'DF6', sec: 'fin', text: '1日分の収入で、高額の宝くじを購入する' },
+  { id: 'DR1', sec: 'rec', text: '人里離れた山奥で野営（キャンプ）をする' },
+  { id: 'DR2', sec: 'rec', text: '急流下り（ラフティング）に参加する' },
+  { id: 'DR3', sec: 'rec', text: 'スカイダイビングをする' },
+  { id: 'DR4', sec: 'rec', text: 'スキー場のコース外の斜面を滑る' },
+  { id: 'DR5', sec: 'rec', text: 'バンジージャンプをする' },
+  { id: 'DR6', sec: 'rec', text: '小型飛行機の操縦を習う' },
+  { id: 'ATT1', sec: 'att', text: 'この項目では、左から2番目（「2」）を選択してください。', correct: 2 },
+  { id: 'TR1', sec: 'tr', text: '価格が十分に安ければ、払い戻しのできない航空券を購入する' },
+  { id: 'TR2', sec: 'tr', text: '旅行の予約時に、キャンセル保険や取消補償を付けずに予約する' },
+  { id: 'TR3', sec: 'tr', text: '乗り継ぎ時間が1時間未満の、安い乗継便を選ぶ' },
+  { id: 'TR4', sec: 'tr', text: '宿泊予約で、返金不可の格安プランを選ぶ' },
+  { id: 'TR5', sec: 'tr', text: '日程がまだ確定していない段階で、安いうちに予約してしまう' },
+  { id: 'TR6', sec: 'tr', text: '長距離の国際線でも、格安航空会社（LCC）を利用する' },
+];
+
+/* ---------- 刺激材料（4_刺激材料）----------
+   cancel.type: fixed（いつでも同じ払戻率）/ hours（出発○時間前まで無料）/ days（宿泊○日前まで無料）/ free
+   loss は engine.js がイベント時点の条件から計算（sheetLoss はシートの損失列：比較用） */
+const SCENARIOS = {
+  PRACTICE: {
+    key: 'PRACTICE', kind: 'flight', label: '練習', icon: 'plane',
+    title: '東京 → 福岡', meta: '片道・大人1名', place: '東京（成田・羽田）→ 福岡',
+    daysAhead: 7, budget: null,
+    brief: '練習課題です。来週、福岡へ日帰りで出張します。操作に慣れるための練習で、仮想残高には影響しません。好きなプランを1つ選び、予約の確定まで進んでください。',
+    event: { type: 'cancel', hoursBefore: 48, daysBefore: 2, when: '出発2日前',
+      assumption: '出発2日前に旅行を取りやめた場合', notice: '' },
+    refPlan: 'P3',
+    plans: [
+      { id: 'P1', provider: 'カイトエア', ptype: 'LCC', flightNo: '201',
+        dep: { t: '06:50', ap: '成田' }, arr: { t: '09:00', ap: '福岡' }, dur: '2時間10分', stops: 0,
+        price: 6990,
+        cancel: { type: 'fixed', refund: 0, text: '払戻不可（取消時の返金なし）', short: '払戻不可' },
+        change: { possible: false, text: '変更不可', short: '変更不可' },
+        extras: ['受託手荷物は有料'], grade: 'High', sheetLoss: 6990, scarcity: '残り3席' },
+      { id: 'P2', provider: 'ハルカゼ航空', ptype: 'MCC', flightNo: '401',
+        dep: { t: '09:30', ap: '羽田' }, arr: { t: '11:30', ap: '福岡' }, dur: '2時間00分', stops: 0,
+        price: 9400,
+        cancel: { type: 'fixed', refund: 0.7, text: '払戻70%（取消時に運賃の70%を返金）', short: '払戻70%' },
+        change: { possible: true, fee: 2000, text: '変更手数料 2,000円', short: '変更 2,000円' },
+        extras: [], grade: 'Med', sheetLoss: 2820 },
+      { id: 'P3', provider: 'アオバ航空', ptype: 'FSC', flightNo: '611', fareName: 'フレックス',
+        dep: { t: '12:15', ap: '羽田' }, arr: { t: '14:10', ap: '福岡' }, dur: '1時間55分', stops: 0,
+        price: 12800,
+        cancel: { type: 'free', text: 'いつでも無料（全額返金）', short: 'いつでも無料' },
+        change: { possible: true, fee: 0, text: '変更無料', short: '変更無料' },
+        extras: [], grade: 'Low', sheetLoss: 0 },
+    ],
+  },
+
+  DOM: {
+    key: 'DOM', kind: 'flight', label: '国内航空券', icon: 'plane',
+    title: '東京 → 札幌', meta: '片道・大人1名', place: '東京（成田・羽田）→ 札幌（新千歳）',
+    daysAhead: 14, budget: 20000,
+    brief: '2週間後に札幌へ1泊2日の旅行をします。仮想予算は20,000円です。日程が変わる可能性もふまえて、あなたにとって最も良いと思うプランを1つ予約してください。',
+    event: { type: 'cancel', hoursBefore: 48, daysBefore: 2, when: '出発2日前',
+      assumption: '出発2日前に旅行を取りやめた場合',
+      notice: '【予定変更のお知らせ】出発2日前、急な仕事の都合で旅行を中止せざるを得なくなりました。予約したプランの取消条件に従ってキャンセルが行われます。' },
+    refPlan: 'D6',
+    plans: [
+      { id: 'D1', provider: 'カイトエア', ptype: 'LCC', flightNo: '101',
+        dep: { t: '07:30', ap: '成田' }, arr: { t: '09:10', ap: '新千歳' }, dur: '1時間40分', stops: 0,
+        price: 7790,
+        cancel: { type: 'fixed', refund: 0, text: '払戻不可（取消時の返金なし）', short: '払戻不可' },
+        change: { possible: false, text: '変更不可', short: '変更不可' },
+        extras: ['受託手荷物は有料'], grade: 'High', sheetLoss: 7790, scarcity: '残り2席' },
+      { id: 'D2', provider: 'カイトエア', ptype: 'LCC', flightNo: '103',
+        dep: { t: '09:10', ap: '成田' }, arr: { t: '10:50', ap: '新千歳' }, dur: '1時間40分', stops: 0,
+        price: 8460,
+        cancel: { type: 'fixed', refund: 0.5, text: '払戻50%（取消時に運賃の50%を返金）', short: '払戻50%' },
+        change: { possible: true, fee: 3000, text: '変更手数料 3,000円', short: '変更 3,000円' },
+        extras: ['受託手荷物は有料'], grade: 'High', sheetLoss: 4230, scarcity: '残り4席' },
+      { id: 'D3', provider: 'ハルカゼ航空', ptype: 'MCC', flightNo: '311',
+        dep: { t: '10:05', ap: '羽田' }, arr: { t: '11:40', ap: '新千歳' }, dur: '1時間35分', stops: 0,
+        price: 9980,
+        cancel: { type: 'fixed', refund: 0.7, text: '払戻70%（取消時に運賃の70%を返金）', short: '払戻70%' },
+        change: { possible: true, fee: 2000, text: '変更手数料 2,000円', short: '変更 2,000円' },
+        extras: [], grade: 'Med', sheetLoss: 2994 },
+      { id: 'D4', provider: 'アオバ航空', ptype: 'FSC', flightNo: '521',
+        dep: { t: '11:20', ap: '羽田' }, arr: { t: '12:55', ap: '新千歳' }, dur: '1時間35分', stops: 0,
+        price: 11200,
+        cancel: { type: 'fixed', refund: 0.8, text: '払戻80%（取消時に運賃の80%を返金）', short: '払戻80%' },
+        change: { possible: true, fee: 1000, text: '変更手数料 1,000円', short: '変更 1,000円' },
+        extras: [], grade: 'Med', sheetLoss: 2240 },
+      { id: 'D5', provider: 'アオバ航空', ptype: 'FSC', flightNo: '503',
+        dep: { t: '08:45', ap: '羽田' }, arr: { t: '10:20', ap: '新千歳' }, dur: '1時間35分', stops: 0,
+        price: 12510,
+        cancel: { type: 'hours', freeUntil: 24, refundAfter: 0.5, text: '出発24時間前まで無料（以降は運賃の50%を返金）', short: '24時間前まで無料' },
+        change: { possible: true, fee: 0, text: '変更無料', short: '変更無料' },
+        extras: ['座席指定込み'], grade: 'Low', sheetLoss: 0 },
+      { id: 'D6', provider: 'アオバ航空', ptype: 'FSC', flightNo: '531', fareName: 'フレックス',
+        dep: { t: '13:30', ap: '羽田' }, arr: { t: '15:05', ap: '新千歳' }, dur: '1時間35分', stops: 0,
+        price: 13800,
+        cancel: { type: 'free', text: 'いつでも無料（全額返金）', short: 'いつでも無料' },
+        change: { possible: true, fee: 0, text: '変更無料', short: '変更無料' },
+        extras: [], grade: 'Low', sheetLoss: 0 },
+    ],
+  },
+
+  INT: {
+    key: 'INT', kind: 'flight', intl: true, label: '国際航空券', icon: 'plane',
+    title: '東京 → パリ', meta: '片道・大人1名', place: '東京（成田・羽田）→ パリ（シャルル・ド・ゴール）',
+    daysAhead: 30, budget: 320000,
+    brief: '1か月後にパリへ旅行します（東京発・片道・大人1名）。仮想予算は320,000円です。日程が変わる可能性もふまえて、あなたにとって最も良いと思うプランを1つ予約してください。',
+    event: { type: 'change', hoursBefore: 240, daysBefore: 10, when: '出発10日前',
+      assumption: '出発10日前に日程を3日後ろへ変更した場合（変更できない運賃は取消扱い）',
+      notice: '【予定変更のお知らせ】出発10日前、渡航日程を3日後ろにずらす必要が生じました。予約したプランの変更条件に従って日程変更が行われます（変更不可のプランはキャンセル扱い）。' },
+    refPlan: 'I5',
+    plans: [
+      { id: 'I1', provider: 'オルビス航空', ptype: '乗継2回', flightNo: '902ほか',
+        dep: { t: '23:55', ap: '成田' }, arr: { t: '17:25', ap: 'パリ', plusDay: 1 }, dur: '25時間30分', stops: 2,
+        via: '上海で乗継（45分）、イスタンブールで乗継（2時間10分）', minConnect: 45,
+        price: 198000,
+        cancel: { type: 'fixed', refund: 0, text: '払戻不可（取消時の返金なし）', short: '払戻不可' },
+        change: { possible: false, text: '変更不可', short: '変更不可' },
+        extras: ['乗継の遅延による乗り遅れの補償なし'], grade: 'High', sheetLoss: 198000, scarcity: '残り2席' },
+      { id: 'I2', provider: 'ノルデン航空', ptype: '乗継1回', flightNo: '52ほか',
+        dep: { t: '11:05', ap: '羽田' }, arr: { t: '20:55', ap: 'パリ' }, dur: '17時間50分', stops: 1,
+        via: 'ヘルシンキで乗継（1時間50分）', minConnect: 110,
+        price: 232500,
+        cancel: { type: 'fixed', refund: 0.3, text: '払戻30%（取消時に運賃の30%を返金）', short: '払戻30%' },
+        change: { possible: true, fee: 30000, text: '変更手数料 30,000円', short: '変更 30,000円' },
+        extras: [], grade: 'High', sheetLoss: 162750, scarcity: '残り3席' },
+      { id: 'I3', provider: 'アオバ航空', ptype: '直行', flightNo: '215',
+        dep: { t: '10:25', ap: '羽田' }, arr: { t: '16:55', ap: 'パリ' }, dur: '14時間30分', stops: 0,
+        price: 261260,
+        cancel: { type: 'fixed', refund: 0.7, text: '払戻70%（取消時に運賃の70%を返金）', short: '払戻70%' },
+        change: { possible: true, fee: 15000, text: '変更手数料 15,000円', short: '変更 15,000円' },
+        extras: ['24時間サポート'], grade: 'Med', sheetLoss: 78378 },
+      { id: 'I4', provider: 'アオバ航空', ptype: '直行', flightNo: '205',
+        dep: { t: '21:55', ap: '羽田' }, arr: { t: '04:25', ap: 'パリ', plusDay: 1 }, dur: '14時間30分', stops: 0,
+        price: 289000,
+        cancel: { type: 'fixed', refund: 0.8, text: '払戻80%（取消時に運賃の80%を返金）', short: '払戻80%' },
+        change: { possible: true, fee: 0, text: '無料変更1回まで', short: '無料変更1回' },
+        extras: ['24時間サポート'], grade: 'Low', sheetLoss: 0 },
+      { id: 'I5', provider: 'アオバ航空', ptype: '直行', flightNo: '215', fareName: 'フレックス',
+        dep: { t: '10:25', ap: '羽田' }, arr: { t: '16:55', ap: 'パリ' }, dur: '14時間30分', stops: 0,
+        price: 312000,
+        cancel: { type: 'free', text: '全額払戻', short: '全額払戻' },
+        change: { possible: true, fee: 0, text: '変更無料', short: '変更無料' },
+        extras: ['優先サポート'], grade: 'Low', sheetLoss: 0 },
+    ],
+  },
+
+  HOTEL: {
+    key: 'HOTEL', kind: 'hotel', label: 'ホテル', icon: 'bed',
+    title: '京都・2泊', meta: '2名・1室', place: '京都（四条烏丸周辺）',
+    daysAhead: 21, budget: 30000,
+    brief: '3週間後に、同行者と京都に2泊します。仮想予算は30,000円です。予定が変わる可能性もふまえて、あなたにとって最も良いと思うプランを1つ予約してください。',
+    event: { type: 'cancel', hoursBefore: 24, daysBefore: 1, when: '宿泊前日',
+      assumption: '宿泊前日に宿泊を取りやめた場合',
+      notice: '【予定変更のお知らせ】宿泊前日、同行者の体調不良により宿泊を取りやめることになりました。予約したプランの取消条件に従ってキャンセルが行われます。' },
+    refPlan: 'H5',
+    plans: [
+      { id: 'H1', provider: 'ホテル アサギ京都', ptype: 'シティホテル', room: 'ダブルルーム', meal: '素泊まり',
+        price: 14200,
+        cancel: { type: 'fixed', refund: 0, text: '返金不可（取消時の返金なし）', short: '返金不可' },
+        change: { possible: false, text: '変更不可', short: '変更不可' },
+        extras: [], grade: 'High', sheetLoss: 14200, scarcity: '残り1室' },
+      { id: 'H2', provider: 'ホテル アサギ京都', ptype: 'シティホテル', room: 'ダブルルーム', meal: '素泊まり',
+        price: 16800,
+        cancel: { type: 'days', freeUntilDays: 3, refundAfter: 0, text: '3日前まで無料（以降は宿泊料金の100%）', short: '3日前まで無料' },
+        change: { possible: true, fee: 0, text: '3日前まで無料', short: '3日前まで無料' },
+        extras: [], grade: 'Med', sheetLoss: 16800, scarcity: '残り2室' },
+      { id: 'H3', provider: 'ホテル アサギ京都', ptype: 'シティホテル', room: 'ダブルルーム', meal: '朝食付',
+        price: 18900,
+        cancel: { type: 'days', freeUntilDays: 1, refundAfter: 0.5, text: '前日まで無料（当日は宿泊料金の50%）', short: '前日まで無料' },
+        change: { possible: true, fee: 0, text: '前日まで無料', short: '前日まで無料' },
+        extras: [], grade: 'Med', sheetLoss: 9450 },
+      { id: 'H4', provider: 'ホテル アサギ京都', ptype: 'シティホテル', room: 'ダブルルーム', meal: '朝食付',
+        price: 21500,
+        cancel: { type: 'days', freeUntilDays: 0, refundAfter: 0, text: '当日18時まで無料', short: '当日18時まで無料' },
+        change: { possible: true, fee: 0, text: '当日18時まで無料', short: '当日18時まで無料' },
+        extras: [], grade: 'Low', sheetLoss: 0 },
+      { id: 'H5', provider: 'ホテル アサギ京都', ptype: 'シティホテル', room: 'ダブルルーム', meal: '朝食付', fareName: 'フレックス',
+        price: 24800,
+        cancel: { type: 'free', text: 'いつでも無料', short: 'いつでも無料' },
+        change: { possible: true, fee: 0, text: 'いつでも無料', short: 'いつでも無料' },
+        extras: [], grade: 'Low', sheetLoss: 0 },
+    ],
+  },
+};
+
+/* ---------- 理解度クイズ（5_理解度クイズ）：dyn は選んだプランから選択肢を生成 ---------- */
+const QUIZ = {
+  DOM: [
+    { id: 'QD1', type: 'sc', text: 'プランD1（7,790円）を出発3日前にキャンセルした場合、払い戻される金額はいくらですか。', options: ['0円', '3,895円', '7,790円', 'わからない'], correct: ['0円'] },
+    { id: 'QD2', type: 'sc', text: 'プランD2（8,460円）の日程変更にかかる手数料はいくらですか。', options: ['無料', '1,000円', '3,000円', '変更不可'], correct: ['3,000円'] },
+    { id: 'QD3', type: 'sc', text: '無料でキャンセルできるプランのうち、最も安いものはどれですか。', options: ['D2', 'D4', 'D5', 'D6'], correct: ['D5'] },
+    { id: 'QD4', type: 'sc', text: 'プランD5のキャンセル無料の期限はいつまでですか。', options: ['予約後24時間', '出発24時間前', '出発3日前', '期限なし'], correct: ['出発24時間前'] },
+    { id: 'QD5', type: 'dyn', gen: 'refund2days', text: 'あなたが選択したプランを出発2日前にキャンセルした場合、戻ってくる金額として正しいものはどれですか。' },
+  ],
+  INT: [
+    { id: 'QI1', type: 'sc', text: 'プランI1（198,000円）の乗り継ぎ時間は最短で何分ですか。', options: ['45分', '90分', '120分', '直行便'], correct: ['45分'] },
+    { id: 'QI2', type: 'sc', text: 'プランI2（232,500円）をキャンセルした場合の払戻率は何%ですか。', options: ['0%', '30%', '70%', '100%'], correct: ['30%'] },
+    { id: 'QI3', type: 'mc', text: '無料で日程変更できるプランをすべて選んでください。', options: ['I1', 'I2', 'I3', 'I4', 'I5'], correct: ['I4', 'I5'] },
+    { id: 'QI4', type: 'sc', text: 'プランI3（261,260円）の日程変更手数料はいくらですか。', options: ['無料', '15,000円', '30,000円', '変更不可'], correct: ['15,000円'] },
+    { id: 'QI5', type: 'dyn', gen: 'changeFee', text: 'あなたが選択したプランで日程を変更する場合にかかる手数料はいくらですか。' },
+  ],
+  HOTEL: [
+    { id: 'QH1', type: 'sc', text: 'プランH1（14,200円）を宿泊前日にキャンセルした場合、支払い義務はどうなりますか。', options: ['全額返金', '50%返金', '返金なし（全額支払い）', 'わからない'], correct: ['返金なし（全額支払い）'] },
+    { id: 'QH2', type: 'sc', text: 'プランH2（16,800円）のキャンセル無料の期限はいつですか。', options: ['3日前まで', '前日まで', '当日18時まで', 'いつでも無料'], correct: ['3日前まで'] },
+    { id: 'QH3', type: 'mc', text: '宿泊当日でも無料でキャンセルできるプランをすべて選んでください。', options: ['H1', 'H2', 'H3', 'H4', 'H5'], correct: ['H4', 'H5'] },
+    { id: 'QH4', type: 'sc', text: 'プランH3を宿泊当日にキャンセルした場合のキャンセル料は宿泊料金の何%ですか。', options: ['0%', '50%', '80%', '100%'], correct: ['50%'] },
+    { id: 'QH5', type: 'dyn', gen: 'hotelFee1day', text: 'あなたが選択したプランを前日にキャンセルした場合のキャンセル料はいくらですか。' },
+  ],
+};
+
+/* ---------- 課題ごとの質問（7_事後質問：REASON, REASON2, CONF, DRS） ---------- */
+const REASON_OPTIONS = ['価格が安い', '合計費用が明確', 'キャンセル・変更条件が良い', 'リスク表示が低かった', '時間帯・所要時間', '航空会社・ホテルの信頼性', 'サポート体制', 'その他'];
+const DRS_ITEMS = [
+  { id: 'DRS1', text: 'それは正しい決定だった', rev: true },
+  { id: 'DRS2', text: 'その選択を後悔している' },
+  { id: 'DRS3', text: 'もう一度やり直せるとしても、同じ選択をする', rev: true },
+  { id: 'DRS4', text: 'その選択は自分に不利益をもたらした' },
+  { id: 'DRS5', text: 'その決定は賢明だった', rev: true },
+];
+const L5_ANCHORS = ['1 = 全くそう思わない', '5 = 強くそう思う'];
+
+/* ---------- 同意文面（2_同意文面）・デブリーフ（9_デブリーフ文面） ---------- */
+const CONSENT = {
+  title: 'オンライン旅行予約サイトにおける情報表示と意思決定に関する研究',
+  org: '工学院大学 機械工学専攻 見崎研究室（責任者：見崎大悟／担当：山岡明咲花）',
+  items: [
+    ['目的', '旅行予約サイトの情報の見せ方が、プラン選択にどのような影響を与えるかを調べます。'],
+    ['内容', '模擬的な予約サイトで3回の予約課題を行い、その前後で質問紙に回答していただきます（約25分）。'],
+    ['報酬', '基本報酬（500円相当）に加え、課題成績に応じたボーナス（最大300円相当）をお支払いします。'],
+    ['ボーナスの仕組み', '各課題では仮想の旅行予算が与えられます。予約確定後、一定の確率（各課題{P}%）で「予定変更イベント」が発生し、選んだプランの取消・変更条件に従って仮想予算から損失が差し引かれます。実験終了時の仮想残高が多いほどボーナスが増えます。イベントの発生は乱数で決まり、操作されることはありません。'],
+    ['データ', '回答内容および画面上の操作記録（クリック・閲覧時間等）を匿名化して収集します。個人を特定できる情報は収集しません。'],
+    ['任意性', '参加は任意であり、いつでも不利益なく中断できます（中断時は基本報酬のみ）。'],
+    ['データの公開', '匿名化したデータは、学術目的のためオンラインリポジトリで公開される場合があります。'],
+    ['問い合わせ先', '（実施時に連絡先を記載）'],
+  ],
+  ethics: '※本研究は工学院大学の研究倫理審査の承認を得て実施します（承認番号：実施前に記載）。',
+};
+
+const DEBRIEF = [
+  'ご参加ありがとうございました。',
+  '本研究の目的は、旅行予約サイトにおける「取消・変更条件（リスク）の見せ方」が、プラン選択や条件の理解にどのような影響を与えるかを調べることでした。',
+  '参加者の皆さまは、(1) 一般的な価格中心の表示、(2) 全員に同じリスク段階表示、(3) 回答いただいたリスク許容度に合わせて表示を調整した画面、のいずれかをご利用いただきました。',
+];
+const DEBRIEF_BULLETS = [
+  '本実験に登場した予約サイト・航空会社・ホテル・価格はすべて架空のものです。',
+  '「予定変更イベント」は事前にお伝えした確率（各課題{P}%）の乱数で発生したもので、回答内容によって操作されることはありません。',
+  'ボーナスは説明どおり、仮想残高に応じて計算されます（数日以内にお支払いします）。',
+];
+const DEBRIEF_C1_NOTE = '画面に表示された「残り○席」「残り○室」の表示も架空のもので、実際の在庫とは関係ありません。';
+const DEBRIEF_FLOW_NOTE = '「情報の行き先」に示した送信は模擬です。氏名やカード番号は架空の値で、どこにも送信していません。記録したのは画面上の操作記録（匿名）のみです。';
+const DEBRIEF_END = [
+  '実際の旅行予約では、価格だけでなく取消・変更条件を確認することで、予定変更時の思わぬ損失を避けられます。',
+  '本研究についてのご質問や、データ利用の撤回のご希望は、下記までご連絡ください：（連絡先を記載）',
+  '改めまして、ご協力ありがとうございました。',
+];
+
+/* ---------- 予約手続きのダミー入力値（実在の個人情報は扱わない） ---------- */
+const DUMMY = {
+  nameKana: 'ケンキュウ タロウ', nameRoman: 'KENKYU TARO', phone: '000-0000-0000', email: 'taro@example.com',
+  birth: '2000-01-01', nationality: '日本', passport: 'XX0000000', address: '東京都架空区そらまど1-2-3',
+  card: '•••• •••• •••• 0000', cardName: 'KENKYU TARO', cardExp: '12/30',
+};
+
+/* ============================================================
+   engine.js — 乱数・損失計算・整合性・ボーナス・ログ・設定
+   ============================================================ */
+const T0 = performance.now();
+const nowMs = () => Math.round(performance.now() - T0);
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+const fmtN = n => Math.round(n).toLocaleString('ja-JP');
+const yen = n => '¥' + fmtN(n);
+const yenJ = n => fmtN(n) + '円';
+const pctOf = r => Math.round(r * 100) + '%';
+
+const WD = ['日', '月', '火', '水', '木', '金', '土'];
+function addDays(d, n) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() + n); return x; }
+const fmtDate = d => `${d.getMonth() + 1}月${d.getDate()}日（${WD[d.getDay()]}）`;
+const fmtMD = d => `${d.getMonth() + 1}/${d.getDate()}`;
+
+/* ---------- 乱数：seed = FNV-1a(participant_id | task_no) → mulberry32 の最初の値 ---------- */
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return h >>> 0;
+}
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function eventDraw(pid, taskNo, p) {
+  const seed = fnv1a(`${pid}|task${taskNo}`);
+  const rand = mulberry32(seed)();
+  return { seed, rand: Math.round(rand * 1e6) / 1e6, occurred: rand < p };
+}
+function seededShuffle(arr, rnd) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+/* ---------- 損失計算（取消・変更条件 × イベント時点） ---------- */
+function refundRate(c, ev) {
+  switch (c.type) {
+    case 'free': return 1;
+    case 'fixed': return c.refund;
+    case 'hours': return ev.hoursBefore >= c.freeUntil ? 1 : c.refundAfter;
+    case 'days': return ev.daysBefore >= c.freeUntilDays ? 1 : c.refundAfter;
+    default: return 0;
+  }
+}
+function rulesLoss(scn, plan) {
+  const ev = scn.event;
+  if (ev.type === 'change' && plan.change.possible) return plan.change.fee || 0;
+  const r = refundRate(plan.cancel, ev);
+  return Math.round(plan.price * (1 - r));
+}
+function lossOf(scn, plan, cfg) {
+  if (cfg && cfg.lossSource === 'sheet' && typeof plan.sheetLoss === 'number') return plan.sheetLoss;
+  return rulesLoss(scn, plan);
+}
+function findPlan(scn, id) { return scn.plans.find(p => p.id === id) || null; }
+function refPlanOf(scn) { return findPlan(scn, scn.refPlan) || scn.plans.reduce((a, b) => (a.price > b.price ? a : b)); }
+function savingsOf(scn, plan) { return Math.max(0, refPlanOf(scn).price - plan.price); }
+function cheapestOf(scn) { return scn.plans.reduce((a, b) => (a.price <= b.price ? a : b)); }
+
+/* 攪乱イベント時に表示する「適用された条件」（手順書6.3：損失額の根拠となる1行のみ） */
+function appliedLine(scn, plan, cfg) {
+  const ev = scn.event;
+  const unit = scn.kind === 'hotel' ? '宿泊料金' : '運賃';
+  if (cfg && cfg.lossSource === 'sheet' && typeof plan.sheetLoss === 'number' && plan.sheetLoss !== rulesLoss(scn, plan)) {
+    return `刺激材料シートの損失額を適用（${yenJ(plan.sheetLoss)}）`;
+  }
+  if (ev.type === 'change') {
+    if (plan.change.possible) {
+      return plan.change.fee ? `変更条件「変更手数料 ${yenJ(plan.change.fee)}」を適用` : `変更条件「${plan.change.short}」により手数料なしで変更`;
+    }
+    const r = refundRate(plan.cancel, ev);
+    return `変更不可のため取消扱い：「${plan.cancel.short}」（返金 ${yenJ(plan.price * r)}）`;
+  }
+  const r = refundRate(plan.cancel, ev);
+  const refund = Math.round(plan.price * r);
+  if (r === 1) return `取消条件「${plan.cancel.short}」により全額返金（返金 ${yenJ(refund)}）`;
+  if (plan.cancel.type === 'hours' || plan.cancel.type === 'days') {
+    return r === 0
+      ? `「${plan.cancel.short}」の期限後のため${unit}の100%が取消料（返金 0円）`
+      : `「${plan.cancel.short}」の期限後のため${unit}の${pctOf(r)}を返金（返金 ${yenJ(refund)}）`;
+  }
+  return r === 0 ? `取消条件「${plan.cancel.short}」により返金なし（返金 0円）` : `取消条件「${plan.cancel.short}」により${unit}の${pctOf(r)}を返金（返金 ${yenJ(refund)}）`;
+}
+
+/* ---------- 理解度クイズ（Q5は選んだプランの条件から選択肢を作る） ---------- */
+function moneyOptions(correct, price, fractions) {
+  const cand = [];
+  fractions.forEach(f => { const v = Math.round(price * f); if (v !== correct && !cand.includes(v)) cand.push(v); });
+  const opts = [correct, ...cand.slice(0, 3)].sort((a, b) => a - b);
+  return opts.map(yenJ);
+}
+function resolveQuiz(scnKey, plan) {
+  const scn = SCENARIOS[scnKey];
+  return (QUIZ[scnKey] || []).map(q => {
+    if (q.type !== 'dyn') return { ...q };
+    if (!plan) return { ...q, type: 'sc', options: ['—'], correct: ['—'] };
+    if (q.gen === 'refund2days') {
+      const refund = Math.round(plan.price * refundRate(plan.cancel, scn.event));
+      return { ...q, type: 'sc', options: moneyOptions(refund, plan.price, [0, 0.5, 1, 0.3, 0.7]), correct: [yenJ(refund)] };
+    }
+    if (q.gen === 'hotelFee1day') {
+      const fee = Math.round(plan.price * (1 - refundRate(plan.cancel, scn.event)));
+      return { ...q, type: 'sc', options: moneyOptions(fee, plan.price, [0, 0.5, 1, 0.3]), correct: [yenJ(fee)] };
+    }
+    if (q.gen === 'changeFee') {
+      const c = plan.change;
+      const ans = !c.possible ? '変更不可' : (c.fee ? yenJ(c.fee) : '無料');
+      return { ...q, type: 'sc', options: ['無料', '15,000円', '30,000円', '変更不可'], correct: [ans] };
+    }
+    return { ...q };
+  });
+}
+function scoreAnswer(q, ans) {
+  const a = Array.isArray(ans) ? ans.slice().sort() : (ans == null ? [] : [ans]);
+  const c = q.correct.slice().sort();
+  return a.length === c.length && a.every((v, i) => v === c[i]) ? 1 : 0;
+}
+
+/* ---------- リスク許容度（DOSPERT金融・レク＋旅行の平均 → 段階） ---------- */
+const mean = a => (a.length ? a.reduce((s, v) => s + v, 0) / a.length : null);
+const r3 = x => (x == null ? null : Math.round(x * 1000) / 1000);
+function stageFromComposite(x, cutoffs) {
+  if (x == null) return null;
+  if (x < cutoffs[0]) return 'S1';
+  if (x < cutoffs[1]) return 'S2';
+  if (x < cutoffs[2]) return 'S3';
+  return 'S4';
+}
+function computeProfile(ans, cutoffs) {
+  const pick = sec => PROFILE_ITEMS.filter(i => i.sec === sec).map(i => ans[i.id]).filter(v => typeof v === 'number');
+  const fin = pick('fin'), rec = pick('rec'), tr = pick('tr');
+  const all = fin.concat(rec, tr);
+  const composite = mean(all);
+  const values = PROFILE_ITEMS.map(i => ans[i.id]);
+  return {
+    dospert_fin: r3(mean(fin)), dospert_rec: r3(mean(rec)), travel_mean: r3(mean(tr)),
+    composite: r3(composite), stage: stageFromComposite(composite, cutoffs),
+    att1_pass: ans.ATT1 === 2 ? 1 : 0,
+    straightline: values.every(v => v === values[0]) ? 1 : 0,
+  };
+}
+function alignmentScore(stage, grade) { return stage && ALIGN[stage] ? ALIGN[stage][grade] : null; }
+
+/* ---------- ボーナス・完了コード（手順書6.4） ---------- */
+function bonusOf(totalLoss, cfg) { return Math.max(0, Math.round(cfg.bonusMax * (1 - totalLoss / cfg.lmax))); }
+function completionCode(pid, totalLoss) {
+  const h = fnv1a(`${pid}|done|${totalLoss}`).toString(36).toUpperCase().padStart(7, '0');
+  return `SMD-${h.slice(0, 4)}-${h.slice(4, 7)}`;
+}
+function bookingNo(pid, taskNo, planId) { return 'R' + fnv1a(`${pid}|${taskNo}|${planId}`).toString(36).toUpperCase().padStart(7, '0').slice(0, 7); }
+
+/* ---------- 並べ替え ---------- */
+const minutesOf = t => { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; };
+function sortPlans(scn, key, cfg) {
+  const arr = scn.plans.slice();
+  const byPrice = (a, b) => a.price - b.price;
+  if (key === 'price') arr.sort(byPrice);
+  else if (key === 'priceDesc') arr.sort((a, b) => b.price - a.price);
+  else if (key === 'time') arr.sort((a, b) => (a.dep ? minutesOf(a.dep.t) : 0) - (b.dep ? minutesOf(b.dep.t) : 0) || byPrice(a, b));
+  else if (key === 'protect') arr.sort((a, b) => GRADE_ORDER[a.grade] - GRADE_ORDER[b.grade] || lossOf(scn, a, cfg) - lossOf(scn, b, cfg) || byPrice(a, b));
+  return arr;
+}
+
+/* ---------- ブロックランダム化の割付表（ブロックサイズ6、ラテン方格は条件内で均等） ---------- */
+function allocationTable(n, seedStr, prefix) {
+  const rnd = mulberry32(fnv1a(`alloc|${seedStr}`));
+  const rows = [];
+  const queues = { C1: [], C2: [], C3: [] };
+  let slot = 0;
+  while (rows.length < n) {
+    const block = seededShuffle(['C1', 'C1', 'C2', 'C2', 'C3', 'C3'], rnd);
+    for (const c of block) {
+      if (rows.length >= n) break;
+      if (!queues[c].length) queues[c] = seededShuffle(['A', 'B', 'C'], rnd);
+      slot++;
+      rows.push({ slot, participant_id: `${prefix}${String(slot).padStart(3, '0')}`, condition: c, latin_order: queues[c].shift(), block: Math.ceil(slot / 6) });
+    }
+  }
+  return rows;
+}
+
+/* ---------- 設定（URLパラメータ：スタンドアロン版で有効） ---------- */
+function readUrlConfig() {
+  const out = {};
+  let qs;
+  try { qs = new URLSearchParams(location.search); } catch (e) { return out; }
+  const g = k => qs.get(k);
+  if (g('pid')) out.pid = g('pid').replace(/[^\w\-.@]/g, '').slice(0, 64);
+  const c = String(g('c') || g('condition') || '').toUpperCase(); if (CONDITIONS[c]) out.condition = c;
+  const o = String(g('order') || g('latin') || '').toUpperCase(); if (LATIN[o]) out.latinOrder = o;
+  const m = g('mode'); if (m === 'exp' || m === 'demo') out.mode = m;
+  const b = (k, key) => { const v = g(k); if (v === '1' || v === 'true') out[key] = true; if (v === '0' || v === 'false') out[key] = false; };
+  b('flow', 'flowPanel'); b('rrmap', 'rrMap'); b('lab', 'lab'); b('consent', 'showConsent'); b('profile', 'showProfile'); b('practice', 'showPractice');
+  const st = String(g('stage') || '').toUpperCase(); if (STAGES[st]) out.stageOverride = st;
+  const ls = g('loss'); if (ls === 'sheet' || ls === 'rules') out.lossSource = ls;
+  const p = parseFloat(g('p')); if (!isNaN(p) && p >= 0 && p <= 1) out.pEvent = p;
+  const ep = g('endpoint'); if (ep && /^https:\/\//.test(ep)) out.endpoint = ep;
+  const ps = g('post'); if (ps && /^https:\/\//.test(ps)) out.postSurveyUrl = ps;
+  const cut = g('cut'); if (cut) { const a = cut.split(',').map(Number); if (a.length === 3 && a.every(x => !isNaN(x))) out.cutoffs = a; }
+  return out;
+}
+function randomPid() {
+  const a = new Uint32Array(1);
+  try { crypto.getRandomValues(a); } catch (e) { a[0] = Math.floor(Math.random() * 4294967295); }
+  return 'P-' + a[0].toString(36).toUpperCase().padStart(6, '0').slice(0, 6);
+}
+
+/* ---------- ログ ---------- */
+const LOG = { meta: {}, consent: null, profile: null, tasks: [], events: [], summary: null };
+function logEv(type, data) {
+  if (LOG.events.length >= 9000) return;
+  LOG.events.push(Object.assign({ t: nowMs(), ts: Date.now(), type }, data || {}));
+}
+function newTaskRecord(no, scnKey, practice) {
+  return {
+    task_no: no, scenario: scnKey, practice: practice ? 1 : 0, started_ts: Date.now(),
+    order_initial: [], sort_initial: null, results_shown_ts: null, first_select_ts: null, confirm_ts: null,
+    plan_chosen: null, price_chosen: null, risk_grade_chosen: null, cheapest_selected: null,
+    assumed_loss_chosen: null, savings_chosen: null, stage_displayed_at_choice: null,
+    detail_opens: 0, detail_ms: {}, dwell_ms: {},
+    sort_changes: 0, compare_toggles: 0, expand_toggles: 0, map_interactions: 0, map_hovers: 0, table_interactions: 0,
+    compare_actions: 0, flow_interactions: 0, plan_switches: 0, stage_changes: 0,
+    choice_time_ms: null, decision_time_ms: null,
+    event_seed: null, event_rand: null, event_occurred: null, loss_jpy: null, budget: null, balance_after: null,
+    quiz: {}, comprehension_score: null, quiz_time_ms: null,
+    stage_measured: null, alignment_score: null,
+    reason: [], reason_other: '', reason2: '', conf: null, drs: {},
+    marketing_optin: 0,
+  };
+}
+
+const CSV_COLS = [
+  'participant_id', 'condition', 'latin_order', 'mode', 'app_version', 'flow_panel', 'rr_map', 'loss_source', 'p_event',
+  'task_no', 'scenario', 'practice',
+  'stage_measured', 'stage_displayed_at_choice', 'composite', 'dospert_fin', 'dospert_rec', 'travel_mean', 'att1_pass', 'straightline_profile',
+  'plan_chosen', 'price_chosen', 'risk_grade_chosen', 'cheapest_selected', 'assumed_loss_chosen', 'savings_chosen',
+  'detail_opens', 'compare_actions', 'sort_changes', 'compare_toggles', 'expand_toggles', 'map_interactions', 'map_hovers', 'table_interactions',
+  'flow_interactions', 'plan_switches', 'stage_changes', 'marketing_optin',
+  'choice_time_ms', 'decision_time_ms', 'dwell_ms_per_plan', 'detail_ms_per_plan',
+  'event_seed', 'event_rand', 'event_occurred', 'loss_jpy', 'budget', 'balance_after',
+  'quiz_q1_correct', 'quiz_q2_correct', 'quiz_q3_correct', 'quiz_q4_correct', 'quiz_q5_correct', 'comprehension_score', 'quiz_time_ms',
+  'alignment_score',
+  'reason', 'reason_other', 'reason2', 'conf', 'drs_1', 'drs_2', 'drs_3', 'drs_4', 'drs_5',
+  'screen_width', 'screen_height', 'total_duration_s', 'total_loss', 'bonus_jpy', 'completion_code',
+].concat(PROFILE_ITEMS.map(i => i.id.toLowerCase()));
+
+function csvCell(v) {
+  if (v == null) return '';
+  const s = typeof v === 'object' ? JSON.stringify(v) : String(v);
+  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function buildCSV() {
+  const m = LOG.meta, pr = LOG.profile || {}, sm = LOG.summary || {};
+  const lines = [CSV_COLS.join(',')];
+  LOG.tasks.forEach(t => {
+    const qv = Object.keys(t.quiz).map(k => t.quiz[k].correct);
+    const row = {
+      participant_id: m.participant_id, condition: m.condition, latin_order: m.latin_order, mode: m.mode, app_version: m.app_version,
+      flow_panel: m.flow_panel ? 1 : 0, rr_map: m.rr_map ? 1 : 0, loss_source: m.loss_source, p_event: m.p_event,
+      task_no: t.task_no, scenario: t.scenario, practice: t.practice,
+      stage_measured: t.stage_measured, stage_displayed_at_choice: t.stage_displayed_at_choice,
+      composite: pr.composite, dospert_fin: pr.dospert_fin, dospert_rec: pr.dospert_rec, travel_mean: pr.travel_mean,
+      att1_pass: pr.att1_pass, straightline_profile: pr.straightline,
+      plan_chosen: t.plan_chosen, price_chosen: t.price_chosen, risk_grade_chosen: t.risk_grade_chosen, cheapest_selected: t.cheapest_selected,
+      assumed_loss_chosen: t.assumed_loss_chosen, savings_chosen: t.savings_chosen,
+      detail_opens: t.detail_opens, compare_actions: t.compare_actions, sort_changes: t.sort_changes, compare_toggles: t.compare_toggles,
+      expand_toggles: t.expand_toggles, map_interactions: t.map_interactions, map_hovers: t.map_hovers, table_interactions: t.table_interactions,
+      flow_interactions: t.flow_interactions, plan_switches: t.plan_switches, stage_changes: t.stage_changes, marketing_optin: t.marketing_optin,
+      choice_time_ms: t.choice_time_ms, decision_time_ms: t.decision_time_ms, dwell_ms_per_plan: t.dwell_ms, detail_ms_per_plan: t.detail_ms,
+      event_seed: t.event_seed, event_rand: t.event_rand, event_occurred: t.event_occurred, loss_jpy: t.loss_jpy, budget: t.budget, balance_after: t.balance_after,
+      quiz_q1_correct: qv[0], quiz_q2_correct: qv[1], quiz_q3_correct: qv[2], quiz_q4_correct: qv[3], quiz_q5_correct: qv[4],
+      comprehension_score: t.comprehension_score, quiz_time_ms: t.quiz_time_ms, alignment_score: t.alignment_score,
+      reason: (t.reason || []).join(';'), reason_other: t.reason_other, reason2: t.reason2, conf: t.conf,
+      drs_1: t.drs.DRS1, drs_2: t.drs.DRS2, drs_3: t.drs.DRS3, drs_4: t.drs.DRS4, drs_5: t.drs.DRS5,
+      screen_width: m.screen_width, screen_height: m.screen_height, total_duration_s: sm.total_duration_s,
+      total_loss: sm.total_loss, bonus_jpy: sm.bonus_jpy, completion_code: sm.completion_code,
+    };
+    PROFILE_ITEMS.forEach(i => { row[i.id.toLowerCase()] = pr.answers ? pr.answers[i.id] : null; });
+    lines.push(CSV_COLS.map(k => csvCell(row[k])).join(','));
+  });
+  return lines.join('\r\n');
+}
+function exportJSON() { return JSON.stringify(LOG, null, 2); }
+
+async function sendLog(endpoint, reason) {
+  if (!endpoint) return { ok: false, skipped: true };
+  const body = JSON.stringify({ reason, participant_id: LOG.meta.participant_id, csv: buildCSV(), log: LOG });
+  try {
+    await fetch(endpoint, { method: 'POST', mode: 'no-cors', keepalive: body.length < 60000, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body });
+    return { ok: true };
+  } catch (e) { return { ok: false, error: String(e) }; }
+}
+
+/* ---------- 保存（再読み込み時の再開用。端末内だけに保存） ---------- */
+const STORE_KEY = 'soramado:v1:session';
+function storeSave(obj) { try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); } catch (e) { /* 保存できない環境でも動作を続ける */ } }
+function storeLoad() { try { const s = localStorage.getItem(STORE_KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+function storeClear() { try { localStorage.removeItem(STORE_KEY); } catch (e) { /* noop */ } }
+
+/* ============================================================
+   ui.js — 状態と画面の描画
+   ============================================================ */
+const $ = (sel, root) => (root || document).querySelector(sel);
+const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+
+const S = {
+  cfg: Object.assign({}, DEFAULT_CONFIG),
+  pid: '',
+  screen: 'welcome',
+  tasks: [], ti: 0,
+  cur: null, recIdx: -1,
+  profile: { answers: {}, result: null },
+  stageManual: null,
+  totalLoss: 0,
+  consentChecked: false,
+  railOpen: false,
+  dest: null, flowFocus: null,
+  drawerPlan: null, drawerReturn: null,
+  labOpen: false,
+  startedTs: Date.now(),
+  todayTs: Date.now(),
+  finished: false,
+  sendStatus: '',
+  pendingResume: null,
+};
+
+const today = () => new Date(S.todayTs);
+const curTask = () => S.tasks[S.ti] || null;
+const curScn = () => { const t = curTask(); return t ? SCENARIOS[t.scn] : null; };
+const rec = () => LOG.tasks[S.recIdx] || null;
+const nTasks = () => S.tasks.filter(t => !t.practice).length || 1;
+const selectedPlan = () => (S.cur && S.cur.selected ? findPlan(curScn(), S.cur.selected) : null);
+
+function stageMeasured() { return S.profile.result ? S.profile.result.stage : null; }
+function stageDisplayed() { return S.stageManual || S.cfg.stageOverride || stageMeasured() || 'S2'; }
+
+/* 条件ごとの表示仕様（手順書 5節） */
+function view() {
+  const c = S.cfg.condition;
+  const st = c === 'C3' ? stageDisplayed() : null;
+  const cautious = st === 'S1' || st === 'S2';
+  return {
+    c, st,
+    badges: c !== 'C1',
+    inline: c === 'C2' || (c === 'C3' && cautious),
+    collapsed: c === 'C3' && !cautious,
+    lossFront: c === 'C3' && cautious,
+    scarcity: c === 'C1',
+    compare: c !== 'C1',
+    compareDefaultOpen: c === 'C2' || (c === 'C3' && cautious),
+    defaultSort: c === 'C3' && cautious ? 'protect' : 'price',
+    profileBar: c === 'C3',
+    emph: c === 'C3' ? 'emph-' + st : '',
+  };
+}
+
+function newCur() {
+  const v = view();
+  return {
+    sort: v.defaultSort, userSorted: false, compareOpen: v.compareDefaultOpen, userCompare: false,
+    expanded: [], selected: null, hl: null, stagePickerOpen: false,
+    dwellOpen: {}, detailOpenAt: null,
+    outcome: null, animDone: false,
+    quizAns: {}, quizStart: null,
+    post: { reason: [], reason_other: '', reason2: '', conf: null, drs: {} },
+    marketing: false,
+  };
+}
+
+/* ---------- 小さな部品 ---------- */
+const LOGO = '<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="8" fill="var(--brand)"/><rect x="7" y="7" width="8" height="8" rx="2" fill="var(--sky)"/><rect x="17" y="7" width="8" height="8" rx="2" fill="var(--brand-ink)" opacity=".92"/><rect x="7" y="17" width="8" height="8" rx="2" fill="var(--brand-ink)" opacity=".92"/><rect x="17" y="17" width="8" height="8" rx="2" fill="var(--brand-ink)" opacity=".92"/></svg>';
+
+const SHAPE = {
+  High: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .8 11.6 11H.4z"/></svg>',
+  Med: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .6 11.4 6 6 11.4.6 6z"/></svg>',
+  Low: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.2"/></svg>',
+};
+const chgShort = p => p.change.short.replace(/^変更\s*/, '') || p.change.short;
+const taskLabel = t => (t.practice ? '練習' : LOG.meta.demo_jump ? 'デモ' : `課題 ${t.no} / ${nTasks()}`);
+const riskBadge = g => `<span class="risk ${g}">${SHAPE[g]}リスク ${g}</span>`;
+
+const STEPS = ['検索結果', 'お客様情報・お支払い', '予約内容の確認', '予約完了', '旅行の結果'];
+function stepper(idx) {
+  const t = curTask();
+  const steps = t && t.practice ? STEPS.slice(0, 4).concat(['練習の終わり']) : STEPS;
+  return `<ol class="stepper" aria-label="予約の進み具合">${steps.map((s, i) =>
+    `<li class="${i < idx ? 'done' : ''}"${i === idx ? ' aria-current="step"' : ''}><span class="n">${i + 1}</span>${esc(s)}</li>`).join('')}</ol>`;
+}
+
+function likert(id, num, text, n, val, anchors) {
+  return `<fieldset class="lk" id="lk-${id}" aria-labelledby="qt-${id}">
+    <div class="lk-q" id="qt-${id}"><span class="qn">${num}</span><span>${esc(text)}</span></div>
+    <div class="lk-scale" style="--n:${n}">${Array.from({ length: n }, (_, k) => k + 1).map(v =>
+      `<label><input type="radio" name="${id}" value="${v}" data-action="lk" data-id="${id}"${val === v ? ' checked' : ''} aria-label="${v}"><span>${v}</span></label>`).join('')}</div>
+    <div class="lk-anchors"><span>${esc(anchors[0])}</span><span>${esc(anchors[1])}</span></div>
+  </fieldset>`;
+}
+
+/* ---------- ヘッダー ---------- */
+const TASK_SCREENS = ['brief', 'results', 'checkout', 'confirm', 'done', 'practiceEnd', 'timeline', 'quiz', 'post'];
+function renderTop() {
+  const t = curTask(), scn = curScn();
+  const inTask = t && TASK_SCREENS.includes(S.screen);
+  let chip = '', wallet = '';
+  if (inTask) {
+    chip = `<span class="task-chip"><b>${esc(taskLabel(t))}</b><span>${esc(scn.label)}</span></span>`;
+    if (t.practice) wallet = '<div class="w"><span>練習</span><b>残高に影響しません</b></div>';
+    else {
+      const o = S.cur && S.cur.outcome && S.cur.animDone ? S.cur.outcome : null;
+      wallet = `<div class="w"><span>この課題の仮想予算</span><b>${yen(scn.budget)}</b></div>` +
+        (o ? `<div class="w"><span>この課題の残高</span><b class="${o.loss > 0 ? 'neg' : ''}">${yen(o.balance)}</b></div>` : '') +
+        `<div class="w"><span>累計の仮想損失</span><b class="${S.totalLoss > 0 ? 'neg' : ''}">${yen(S.totalLoss)}</b></div>`;
+    }
+  }
+  const wide = S.cfg.flowPanel && RAIL_SCREENS.includes(S.screen) && !!t;
+  $('#top').className = 'top' + (wide ? '' : ' narrow');
+  $('#top').innerHTML = `<div class="top-inner"><div class="brand">${LOGO}<div><div class="brand-name">SORAMADO</div><div class="brand-sub">そらまど｜架空の旅行予約サイト（研究用）</div></div></div>${chip}<div class="wallet">${wallet}</div></div>`;
+}
+
+/* ============================================================
+   画面
+   ============================================================ */
+const SCREENS = {};
+
+SCREENS.welcome = () => {
+  const p = Math.round(S.cfg.pEvent * 100);
+  return `<div class="screen">
+    ${S.cfg.mode === 'demo' ? demoLauncher() : ''}
+    <section class="panel stack">
+      <p class="eyebrow">ようこそ</p>
+      <h1 style="font-size:24px">SORAMADOで、旅行の予約を${S.cfg.showPractice ? '練習1回と本番3回' : '3回'}行っていただきます</h1>
+      <p class="lead">SORAMADO（そらまど）は研究用の架空の旅行予約サイトです。国内航空券・国際航空券・ホテルの3つの課題で、プランを1つずつ予約します。</p>
+      <ol class="mw-steps">
+        <li><b>予約する</b><span>検索結果からプランを1つ選び、予約を確定します。</span></li>
+        <li><b>時間が進む</b><span>予約のあと旅行の日まで時間が進み、各課題${p}%の確率で予定変更が起こります。</span></li>
+        <li><b>結果が出る</b><span>予定変更が起きると、選んだプランの取消・変更条件に応じて仮想予算から損失が差し引かれ、ボーナスに反映されます。</span></li>
+      </ol>
+    </section>
+    ${S.cfg.showConsent ? consentPanel() : `<div class="actions"><button class="btn" data-action="consent-yes">はじめる</button></div>`}
+  </div>`;
+};
+
+function consentPanel() {
+  const p = Math.round(S.cfg.pEvent * 100);
+  return `<section class="panel stack" aria-labelledby="consent-h">
+    <h2 id="consent-h">研究へのご協力のお願い</h2>
+    <p class="note"><b>研究課題</b>：${esc(CONSENT.title)}<br><b>実施主体</b>：${esc(CONSENT.org)}</p>
+    <dl class="consent-list">${CONSENT.items.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v.replace('{P}', p))}</dd></div>`).join('')}</dl>
+    <p class="note">${esc(CONSENT.ethics)}</p>
+    <label class="check"><input type="checkbox" id="consent-cb" data-action="consent-check"${S.consentChecked ? ' checked' : ''}><span>上記を読み、内容を理解した上で参加に同意します。</span></label>
+    <div class="actions">
+      <button class="btn" data-action="consent-yes"${S.consentChecked ? '' : ' disabled'} data-dest="事前の質問へ進みます">同意して実験を開始する</button>
+      <button class="btn quiet" data-action="consent-no">同意しない（終了）</button>
+    </div>
+  </section>`;
+}
+
+function demoLauncher() {
+  const c = S.cfg.condition;
+  return `<section class="demo" aria-label="研究者・指導教員向けデモ">
+    <div class="row"><span class="eyebrow">研究者・指導教員向けデモ</span><span class="spacer"></span><button class="btn quiet small" data-action="lab-open">研究者パネル</button></div>
+    <div class="row"><span>実験条件</span><div class="seg" role="group" aria-label="実験条件">${['C1', 'C2', 'C3'].map(k =>
+      `<button data-action="demo-cond" data-v="${k}" aria-pressed="${c === k}">${k} ${esc(CONDITIONS[k].label)}</button>`).join('')}</div></div>
+    <p class="note">${esc(CONDITIONS[c].desc)}</p>
+    ${c === 'C3' ? `<div class="row"><span>C3の段階</span><div class="seg" role="group" aria-label="C3の段階">${['', 'S1', 'S2', 'S3', 'S4'].map(k =>
+      `<button data-action="demo-stage" data-v="${k}" aria-pressed="${(S.cfg.stageOverride || '') === k}">${k || '回答から算出'}</button>`).join('')}</div></div>` : ''}
+    <div class="row"><span>画面を直接見る</span><div class="row">${['PRACTICE', 'DOM', 'INT', 'HOTEL'].map(k =>
+      `<button class="btn quiet small" data-action="demo-jump" data-v="${k}">${esc(SCENARIOS[k].label)}</button>`).join('')}</div></div>
+    <p class="note">「画面を直接見る」は同意と事前質問を省き、${c === 'C3' ? `段階${esc(S.cfg.stageOverride || 'S2')}で` : ''}すぐに検索結果を表示します。参加者と同じ流れを確かめるときは、下の同意から始めてください。</p>
+  </section>`;
+}
+
+SCREENS.resume = () => {
+  const st = S.pendingResume || {};
+  const t = st.tasks && st.tasks[st.ti];
+  return `<div class="screen"><section class="panel stack">
+    <p class="eyebrow">前回の続き</p><h2>途中までの記録があります</h2>
+    <p>参加者ID <span class="mono">${esc(st.pid || '')}</span>${t ? `、${t.practice ? '練習' : `課題${t.no}`}（${esc(SCENARIOS[t.scn].label)}）` : ''}の途中で中断されています。</p>
+    <div class="actions"><button class="btn" data-action="resume-yes">続きから再開する</button><button class="btn quiet" data-action="resume-no">記録を消して最初から始める</button></div>
+  </section></div>`;
+};
+
+SCREENS.declined = () => `<div class="screen"><section class="panel stack"><h2>ご確認ありがとうございました</h2><p>同意いただけなかったため、ここで終了します。このページを閉じてください。</p></section></div>`;
+
+SCREENS.narrow = () => `<div class="screen"><section class="panel stack"><h2>画面の幅が足りません</h2>
+  <p>この実験は、画面の幅が${S.cfg.minWidth}px以上のPC（またはタブレット）でのご参加をお願いしています。現在の幅は<span class="mono">${window.innerWidth}px</span>です。</p>
+  <p>ブラウザのウィンドウを広げてから、下のボタンを押してください。</p>
+  <div class="actions"><button class="btn" data-action="recheck-width">幅をもう一度確認する</button></div></section></div>`;
+
+SCREENS.profile = () => {
+  const ans = S.profile.answers;
+  return `<div class="screen">
+    <section class="panel stack"><p class="eyebrow">事前の質問（約3分）</p><h2>ふだんの行動についての質問</h2><p>${esc(PROFILE_INTRO)}</p></section>
+    <div class="qlist">${PROFILE_ITEMS.map((it, i) => likert(it.id, i + 1, it.text, 7, ans[it.id], L7_ANCHORS)).join('')}</div>
+    <div class="actions"><button class="btn" data-action="profile-submit">回答して次へ</button><span class="err" id="perr" role="alert"></span></div>
+  </div>`;
+};
+
+SCREENS.brief = () => {
+  const t = curTask(), scn = curScn();
+  const date = addDays(today(), scn.daysAhead);
+  const p = Math.round(S.cfg.pEvent * 100);
+  return `<div class="screen">
+    <section class="panel stack brief">
+      <p class="eyebrow">${esc(taskLabel(t))}｜${esc(scn.label)}</p>
+      <h2>${esc(scn.title)}<span class="brief-date">${fmtDate(date)}${scn.kind === 'hotel' ? 'から2泊' : ' 出発'}</span></h2>
+      <p class="lead">${esc(scn.brief)}</p>
+      ${t.practice ? '' : `<p class="note">予約を確定すると旅行の日まで時間が進み、${p}%の確率で予定変更が起こります。損失は選んだプランの取消・変更条件で決まります。</p>`}
+      <div class="actions"><div class="go"><button class="btn" data-action="brief-go" data-dest="① 検索結果を表示します（あなたの情報は送信されません）">検索結果を見る</button></div></div>
+    </section>
+  </div>`;
+};
+
+function sortOptions(scn, v) {
+  const o = [['price', '安い順'], ['priceDesc', '高い順']];
+  if (scn.kind === 'flight') o.push(['time', '出発時刻順']);
+  if (v.badges) o.push(['protect', '保護が手厚い順']);
+  return o;
+}
+
+SCREENS.results = () => {
+  const scn = curScn(), v = view();
+  const plans = sortPlans(scn, S.cur.sort, S.cfg);
+  const date = addDays(today(), scn.daysAhead);
+  return `<div class="screen ${v.emph}">
+    ${stepper(0)}
+    ${v.profileBar ? profileBar() : ''}
+    <div class="searchbar"><span class="route-sum">${esc(scn.title)}</span><span class="meta">${esc(scn.place)}｜${fmtDate(date)}${scn.kind === 'hotel' ? 'から2泊' : ''}｜${esc(scn.meta)}｜${plans.length}件</span></div>
+    ${v.compare ? comparePanel(scn, v, plans) : ''}
+    <div class="sortbar"><span class="lbl">並び順</span><div class="seg" role="group" aria-label="並び順">${sortOptions(scn, v).map(([k, l]) =>
+      `<button data-action="sort" data-v="${k}" aria-pressed="${S.cur.sort === k}" data-dest="並び順だけが変わります（情報は送信されません）">${l}</button>`).join('')}</div></div>
+    ${v.badges ? `<p class="assume">「予定変更時の損失」は${esc(scn.event.assumption)}の想定額、「節約額」は最も柔軟なプラン（${scn.refPlan}）との差額です。</p>` : ''}
+    <div class="plans">${plans.map(p => planCard(p, scn, v)).join('')}</div>
+  </div>`;
+};
+
+function profileBar() {
+  const st = stageDisplayed();
+  const open = S.cur && S.cur.stagePickerOpen;
+  return `<section class="profile-bar" aria-label="表示の調整">
+    <span class="pb-stage">表示設定：${st}　${esc(STAGES[st].label)}</span>
+    <span class="pb-text">事前の質問への回答をもとに、並び順と強調のしかたを調整しています。情報は削除していません。</span>
+    <button class="btn quiet small" data-action="stage-toggle" aria-expanded="${!!open}" data-dest="表示設定の変更パネルを開きます（情報は送信されません）">表示設定を変更</button>
+    ${open ? `<div class="stage-picker" role="radiogroup" aria-label="表示設定">${Object.values(STAGES).map(s =>
+      `<label><input type="radio" name="stagepick" value="${s.name}" data-action="stage-pick"${s.name === st ? ' checked' : ''}><b>${s.name}</b>${esc(s.label)}</label>`).join('')}</div>
+      <p class="note" style="flex-basis:100%">S1・S2は条件と損失を一覧に表示し、損失の小さい順に並べます。S3・S4は安い順に並べ、条件は折りたたみます。どの段階でも、すべての条件を確認できます。</p>` : ''}
+  </section>`;
+}
+
+/* ---------- プランカード（チケット） ---------- */
+function routeBody(p) {
+  return `<div class="route">
+      <div class="pt"><span class="t">${p.dep.t}</span><span class="ap">${esc(p.dep.ap)}</span></div>
+      <div class="leg"><span>${esc(p.dur)}・${p.stops === 0 ? '直行' : `乗継${p.stops}回`}</span></div>
+      <div class="pt"><span class="t">${p.arr.t}${p.arr.plusDay ? '<sup>翌日</sup>' : ''}</span><span class="ap">${esc(p.arr.ap)}</span></div>
+    </div>${p.via ? `<p class="via">${esc(p.via)}</p>` : ''}`;
+}
+function hotelBody(p) {
+  return `<p class="room">${esc(p.room)}・${esc(p.meal)}・2名1室</p><p class="via">チェックイン 15:00／チェックアウト 11:00（2泊）</p>`;
+}
+function rrBars(scn, loss, save) {
+  const scale = Math.max(1, ...scn.plans.map(q => Math.max(lossOf(scn, q, S.cfg), savingsOf(scn, q))));
+  const w = v => Math.max(v > 0 ? 2 : 0, Math.round(v / scale * 100));
+  return `<div class="rrbars" role="group" aria-label="リスクとリターン">
+    <span class="k">リスク：予定変更時の損失</span><span class="trk"><span class="bar loss" style="width:${w(loss)}%;display:block"></span></span><span class="v">${yen(loss)}</span>
+    <span class="k">リターン：節約額</span><span class="trk"><span class="bar save" style="width:${w(save)}%;display:block"></span></span><span class="v">${yen(save)}</span>
+  </div>`;
+}
+function condsDL(p, scn) {
+  return `<dl class="conds">
+    <div><dt>取消（キャンセル）</dt><dd>${esc(p.cancel.text)}</dd></div>
+    <div><dt>変更</dt><dd>${esc(p.change.text)}</dd></div>
+    ${p.extras.length ? `<div><dt>その他</dt><dd>${esc(p.extras.join('／'))}</dd></div>` : ''}
+  </dl>`;
+}
+function stubHTML(p, scn, v, loss, save) {
+  const detailBtn = label => `<button class="linkbtn" data-action="detail" data-plan="${p.id}" data-dest="このサイト内のパネルでプラン${p.id}の運賃・条件の詳細を開きます（別のサイトには移動しません）">${label}</button>`;
+  if (v.c === 'C1') {
+    return `<div class="stub-row"><span class="stub-label">運賃・条件</span>${detailBtn('取消・変更条件などの詳細を見る')}</div>`;
+  }
+  if (v.inline) {
+    return `<div class="stub-row"><span class="stub-label">もしもの時の条件</span><span class="spacer"></span>${detailBtn('詳細を開く')}</div>${condsDL(p, scn)}${rrBars(scn, loss, save)}`;
+  }
+  const open = S.cur.expanded.includes(p.id);
+  return `<div class="stub-row"><span class="stub-label">条件</span>
+      <span class="chips"><span class="chip">取消：${esc(p.cancel.short)}</span><span class="chip">変更：${esc(chgShort(p))}</span></span>
+      <span class="spacer"></span>
+      <button class="linkbtn" data-action="expand" data-plan="${p.id}" aria-expanded="${open}" data-dest="プラン${p.id}の条件と損失を${open ? '閉じます' : '展開します'}">${open ? '閉じる' : '条件と損失を表示'}</button></div>
+    ${open ? `${condsDL(p, scn)}${rrBars(scn, loss, save)}<div class="stub-row" style="margin-top:6px">${detailBtn('詳細を開く')}</div>` : ''}`;
+}
+function planCard(p, scn, v, opts) {
+  const o = opts || {};
+  const loss = lossOf(scn, p, S.cfg), save = savingsOf(scn, p);
+  const hotel = scn.kind === 'hotel';
+  const typeLabel = hotel ? `<span class="ptype">${esc(p.ptype)}</span>` : `<span class="ptype">${esc(p.ptype)}・${esc(p.flightNo)}便</span>`;
+  return `<article class="plan${S.cur.hl === p.id ? ' hl' : ''}${o.summary ? ' chosen' : ''}" id="${o.summary ? 'sum' : 'plan'}-${p.id}" data-plan="${p.id}" aria-label="プラン${p.id}">
+    <div class="plan-main">
+      <div class="plan-head"><span class="pid">プラン ${p.id}</span><span class="prov">${esc(p.provider)}</span>${typeLabel}${p.fareName ? `<span class="fare-name">${esc(p.fareName)}</span>` : ''}</div>
+      ${hotel ? hotelBody(p) : routeBody(p)}
+    </div>
+    <div class="plan-side">
+      <div class="price">${yen(p.price)}<small>${hotel ? '2泊・1室（税込）' : '大人1名（税・手数料込み）'}</small></div>
+      ${v.scarcity && p.scarcity ? `<span class="scarce">${esc(p.scarcity)}</span>` : ''}
+      ${v.badges ? riskBadge(p.grade) : ''}
+      ${v.lossFront ? `<div class="front-loss">予定変更時の損失<b class="${loss === 0 ? 'zero' : ''}">${loss === 0 ? '¥0（損失なし）' : yen(loss)}</b></div>` : ''}
+      ${o.summary ? '' : `<button class="btn" data-action="select" data-plan="${p.id}" data-dest="② お客様情報・お支払いの入力へ進みます。予約はまだ確定せず、あなたの情報も送信されません。">このプランを選ぶ</button>`}
+    </div>
+    <div class="stub">${stubHTML(p, scn, v, loss, save)}</div>
+  </article>`;
+}
+
+/* ---------- 比較パネル（比較表＋リスク・リターン図） ---------- */
+function comparePanel(scn, v, plans) {
+  const open = S.cur.compareOpen;
+  return `<section class="compare" aria-label="リスクとリターンの比較">
+    <div class="compare-head"><h3>リスクとリターンを比べる</h3><span class="spacer"></span>
+      <button class="btn quiet small" data-action="compare-toggle" aria-expanded="${open}" data-dest="比較表と図の表示を切り替えます（情報は送信されません）">${open ? '比較表と図を閉じる' : '比較表と図を開く'}</button></div>
+    ${open ? `<div class="compare-grid"><div class="tbl-wrap">${compareTable(scn, plans)}</div>${S.cfg.rrMap ? rrMapFigure(scn) : ''}</div>` : ''}
+  </section>`;
+}
+function compareTable(scn, plans) {
+  return `<table class="ctable"><thead><tr><th>プラン・リスク</th><th class="r">価格</th><th>取消</th><th>変更</th><th class="r">変更時の損失</th><th class="r">節約額</th></tr></thead><tbody>
+    ${plans.map(p => `<tr data-row="${p.id}" data-action="table-row" data-plan="${p.id}" tabindex="0" data-label="比較表の${p.id}" data-dest="プラン${p.id}のカードへ移動します"${S.cur.hl === p.id ? ' class="hl"' : ''}>
+      <td><span class="gcell"><span class="gmark ${p.grade}">${SHAPE[p.grade]}</span><span class="mono">${p.id}</span><span class="gword">${p.grade}</span></span></td><td class="r">${yen(p.price)}</td><td class="wrap">${esc(p.cancel.short)}</td><td class="wrap">${esc(chgShort(p))}</td>
+      <td class="r">${yen(lossOf(scn, p, S.cfg))}</td><td class="r">${yen(savingsOf(scn, p))}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+function niceAxis(max) {
+  const raw = Math.max(max, 1) / 4;
+  const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+  const n = raw / pow;
+  const step = (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * pow;
+  const count = Math.max(1, Math.ceil(max / step));
+  return { step, max: step * count, count };
+}
+function tickLabel(v, max) {
+  if (max >= 50000) return v === 0 ? '0' : (v / 10000).toLocaleString('ja-JP', { maximumFractionDigits: 1 }) + '万';
+  return fmtN(v);
+}
+function markerPath(g, x, y, r) {
+  if (g === 'High') return `M${x} ${y - r * 1.15}L${x + r * 1.1} ${y + r * 0.8}L${x - r * 1.1} ${y + r * 0.8}Z`;
+  if (g === 'Med') return `M${x} ${y - r * 1.1}L${x + r * 1.1} ${y}L${x} ${y + r * 1.1}L${x - r * 1.1} ${y}Z`;
+  return `M${x - r} ${y}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+}
+function rrMapFigure(scn) {
+  const W = 400, H = 286, ml = 60, mr = 22, mt = 16, mb = 54;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const pts = scn.plans.map(p => ({ p, x: lossOf(scn, p, S.cfg), y: savingsOf(scn, p) }));
+  const ax = niceAxis(Math.max(...pts.map(d => d.x))), ay = niceAxis(Math.max(...pts.map(d => d.y)));
+  const X = v => ml + v / ax.max * pw, Y = v => mt + ph - v / ay.max * ph;
+  // ラベルの重なりを避ける：右側に置き、近い点どうしは上下にずらす
+  const labs = pts.map(d => ({ id: d.p.id, x: X(d.x) + 10, y: Y(d.y) + 4 })).sort((a, b) => a.y - b.y);
+  for (let k = 0; k < 4; k++) {
+    for (let i = 1; i < labs.length; i++) {
+      for (let j = 0; j < i; j++) {
+        const a = labs[j], b = labs[i];
+        if (Math.abs(a.x - b.x) < 26 && Math.abs(a.y - b.y) < 13) b.y = a.y + 13;
+      }
+    }
+  }
+  const labPos = {}; labs.forEach(l => { labPos[l.id] = l; });
+  const xt = Array.from({ length: ax.count + 1 }, (_, i) => i * ax.step);
+  const yt = Array.from({ length: ay.count + 1 }, (_, i) => i * ay.step);
+  return `<figure class="rrmap"><svg viewBox="0 0 ${W} ${H}" role="group" aria-label="リスク・リターン図：横軸が予定変更時の損失、縦軸が最も柔軟なプランとの差額（節約額）">
+    ${yt.map(v => `<line class="grid" x1="${ml}" x2="${W - mr}" y1="${Y(v)}" y2="${Y(v)}"/><text class="tick" x="${ml - 6}" y="${Y(v) + 3.5}" text-anchor="end">${tickLabel(v, ay.max)}</text>`).join('')}
+    ${xt.map(v => `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${mt}" y2="${mt + ph}"/><text class="tick" x="${X(v)}" y="${mt + ph + 15}" text-anchor="middle">${tickLabel(v, ax.max)}</text>`).join('')}
+    <line class="axis" x1="${ml}" x2="${W - mr}" y1="${mt + ph}" y2="${mt + ph}"/><line class="axis" x1="${ml}" x2="${ml}" y1="${mt}" y2="${mt + ph}"/>
+    <text x="${ml + pw / 2}" y="${H - 10}" text-anchor="middle">リスク：予定変更時の損失（円）→</text>
+    <text transform="translate(14 ${mt + ph / 2}) rotate(-90)" text-anchor="middle">リターン：節約額（円）→</text>
+    <text x="${W - mr - 4}" y="${mt + 12}" text-anchor="end" class="tick">安いが損失も大きい</text>
+    ${pts.map(d => {
+      const px = X(d.x), py = Y(d.y), lp = labPos[d.p.id];
+      return `<g class="ptg" data-action="map-point" data-plan="${d.p.id}" data-label="図の点 ${d.p.id}" tabindex="0" role="button" aria-label="プラン${d.p.id}：損失${yenJ(d.x)}、節約額${yenJ(d.y)}" data-dest="プラン${d.p.id}のカードへ移動します">
+        <title>プラン${d.p.id}｜価格 ${yen(d.p.price)}｜変更時の損失 ${yen(d.x)}｜節約額 ${yen(d.y)}</title>
+        <circle cx="${px}" cy="${py}" r="13" fill="transparent"/>
+        <path class="mk ${d.p.grade}${S.cur.hl === d.p.id ? ' hl' : ''}" data-mk="${d.p.id}" d="${markerPath(d.p.grade, px, py, 5.5)}"/>
+        ${Math.abs(lp.y - (py + 4)) > 1 ? `<line x1="${px + 6}" y1="${py}" x2="${lp.x - 2}" y2="${lp.y - 4}" stroke="var(--line-2)"/>` : ''}
+        <text class="lab" x="${lp.x}" y="${lp.y}">${d.p.id}</text></g>`;
+    }).join('')}
+  </svg><figcaption>点にカーソルを合わせると、そのプランのカードと表の行が強調されます。形と色はリスクの段階（▲High ◆Med ●Low）です。</figcaption></figure>`;
+}
+
+/* ---------- 運賃・条件の詳細（このサイト内のパネル） ---------- */
+function drawerHTML(planId) {
+  const scn = curScn(), p = findPlan(scn, planId), v = view();
+  const L = lossOf(scn, p, S.cfg), sv = savingsOf(scn, p);
+  const rows = [
+    ['事業者', ['LCC', 'MCC', 'FSC'].includes(p.ptype) ? `${p.provider}（${p.ptype}）` : p.provider],
+    scn.kind === 'hotel' ? ['部屋・食事', `${p.room}・${p.meal}・2名1室・2泊`] : ['便', `${p.dep.ap} ${p.dep.t} → ${p.arr.ap} ${p.arr.t}${p.arr.plusDay ? '（翌日）' : ''}・${p.dur}`],
+    p.via ? ['乗継', p.via] : null,
+    ['料金', `${yen(p.price)}（${scn.kind === 'hotel' ? '2泊・1室、税込' : '大人1名、税・手数料込み'}）`],
+    ['取消（キャンセル）', p.cancel.text],
+    ['変更', p.change.text],
+    p.extras.length ? ['その他', p.extras.join('／')] : null,
+  ].filter(Boolean);
+  return `<div class="backdrop" data-action="detail-close"></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-h">
+    <div class="drawer-head"><h2 id="dr-h">プラン ${p.id}｜運賃・条件の詳細</h2><button class="btn quiet small" data-action="detail-close" id="dr-close">閉じる</button></div>
+    <div class="drawer-body">
+      <table class="rules"><tbody>${rows.map(([k, vv]) => `<tr><th>${esc(k)}</th><td>${esc(vv)}</td></tr>`).join('')}</tbody></table>
+      ${v.c !== 'C1' ? `<div>${riskBadge(p.grade)}${rrBars(scn, L, sv)}<p class="assume">「予定変更時の損失」は${esc(scn.event.assumption)}の想定額です。</p></div>` : ''}
+      ${S.cfg.flowPanel ? `<p class="prov-line">この条件の出どころ：${esc(p.provider)}の${scn.kind === 'hotel' ? '宿泊プランの規定' : '運賃規則'}（模擬データ）を、SORAMADOが受け取って表示しています。</p>` : ''}
+    </div>
+  </aside>`;
+}
+
+/* ---------- お客様情報・お支払い ---------- */
+function checkoutGroups(scn) {
+  const F = (key, id, label, value) => ({ key, id, label, value });
+  if (scn.kind === 'hotel') {
+    return [
+      ['宿泊代表者', [F('name', 'f-name', '氏名（カナ）', DUMMY.nameKana), F('address', 'f-addr', '住所', DUMMY.address)]],
+      ['連絡先', [F('phone', 'f-phone', '電話番号', DUMMY.phone), F('email', 'f-email', 'メールアドレス', DUMMY.email)]],
+      ['お支払い', [F('card', 'f-card', 'カード番号', DUMMY.card), F('card', 'f-cardname', 'カード名義', DUMMY.cardName), F('card', 'f-cardexp', '有効期限', DUMMY.cardExp)]],
+    ];
+  }
+  const pax = [F('name', 'f-name', '搭乗者氏名（ローマ字）', DUMMY.nameRoman)];
+  if (scn.intl) pax.push(F('passport', 'f-birth', '生年月日', DUMMY.birth), F('passport', 'f-nat', '国籍', DUMMY.nationality), F('passport', 'f-pass', '旅券（パスポート）番号', DUMMY.passport));
+  return [
+    ['搭乗者情報', pax],
+    ['連絡先', [F('phone', 'f-phone', '電話番号', DUMMY.phone), F('email', 'f-email', 'メールアドレス', DUMMY.email)]],
+    ['お支払い', [F('card', 'f-card', 'カード番号', DUMMY.card), F('card', 'f-cardname', 'カード名義', DUMMY.cardName), F('card', 'f-cardexp', '有効期限', DUMMY.cardExp)]],
+  ];
+}
+SCREENS.checkout = () => {
+  const scn = curScn(), p = selectedPlan(), flow = S.cfg.flowPanel;
+  const items = dataItems(scn, p);
+  const byKey = k => items.find(i => i.key === k);
+  return `<div class="screen">
+    ${stepper(1)}
+    <section class="panel row"><span class="pid">プラン ${p.id}</span><b>${esc(p.provider)}</b><span class="muted">${scn.kind === 'hotel' ? `${esc(p.room)}・${esc(p.meal)}` : `${esc(p.dep.ap)} ${p.dep.t} → ${esc(p.arr.ap)} ${p.arr.t}`}</span><span class="spacer"></span><b class="mono">${yen(p.price)}</b>
+      <button class="linkbtn" data-action="back-results" data-dest="① 検索結果に戻ります（入力欄の情報は送信されません）">プランを選び直す</button></section>
+    <p class="callout">入力欄には<b>架空の情報が入力済み</b>です。実在の情報は入力できません。${flow ? '入力欄にカーソルを合わせると、その情報の行き先が「情報の行き先」に表示されます。' : ''}</p>
+    ${checkoutGroups(scn).map(([legend, fields]) => `<fieldset><legend>${esc(legend)}</legend><div class="formgrid">${fields.map(f => {
+      const it = byKey(f.key);
+      return `<div class="field" data-flow="${f.key}"><label for="${f.id}">${esc(f.label)}</label><input type="text" id="${f.id}" value="${esc(f.value)}" readonly data-flow="${f.key}">${flow ? `<span class="to">送信先：<b>${esc(toNames(scn, p, it.to))}</b></span>` : ''}</div>`;
+    }).join('')}</div></fieldset>`).join('')}
+    <fieldset data-flow="marketing"><legend>お知らせの受け取り（任意）</legend>
+      <label class="check"><input type="checkbox" data-action="marketing" data-flow="marketing"${S.cur.marketing ? ' checked' : ''}><span>提携先からのおすすめ情報をメールで受け取る${flow ? `<br><span class="muted" style="font-size:12px">チェックすると、メールアドレスが提携先（広告配信）へ送られます。初期状態はオフです。</span>` : ''}</span></label>
+    </fieldset>
+    <div class="actions"><div class="go"><button class="btn" data-action="to-confirm" data-dest="③ 予約内容の確認へ進みます。まだ予約は確定せず、情報も送信されません。">予約内容の確認へ</button>${flow ? '<span class="dest">③ 予約内容の確認へ（まだ送信されません）</span>' : ''}</div></div>
+  </div>`;
+};
+
+SCREENS.confirm = () => {
+  const scn = curScn(), p = selectedPlan(), v = view(), flow = S.cfg.flowPanel;
+  const items = dataItems(scn, p).filter(i => i.key !== 'search' && (i.key !== 'marketing' || S.cur.marketing));
+  return `<div class="screen ${v.emph}">
+    ${stepper(2)}
+    <section class="panel stack"><p class="eyebrow">③ 予約内容の確認</p><h2>この内容で予約しますか？</h2>${planCard(p, scn, v, { summary: true })}</section>
+    ${flow ? `<section class="panel stack"><h3>確定すると送信される情報（模擬）</h3>
+      <div class="tbl-wrap"><table class="receipt"><thead><tr><th>情報</th><th>送信先</th><th>目的</th></tr></thead><tbody>
+      ${items.map(i => `<tr><td><b>${esc(i.label)}</b></td><td>${esc(toNames(scn, p, i.to))}</td><td>${esc(i.purpose)}</td></tr>`).join('')}
+      </tbody></table></div></section>` : ''}
+    <div class="actions"><div class="go"><button class="btn" data-action="confirm-booking" data-flowpreview="1" data-dest="予約を確定し、上の情報をそれぞれの送信先へ送ります（模擬）。確定後はプランを選び直せません。">予約を確定する</button>${flow ? '<span class="dest">押すと予約が確定し、情報が送信されます（模擬）</span>' : ''}</div>
+      <button class="linkbtn" data-action="back-results" data-dest="① 検索結果に戻ります（情報は送信されません）">プランを選び直す</button></div>
+  </div>`;
+};
+
+SCREENS.done = () => {
+  const scn = curScn(), p = selectedPlan(), t = curTask();
+  return `<div class="screen">
+    ${stepper(3)}
+    <section class="panel stack"><p class="eyebrow">④ 予約完了（模擬）</p><h2>予約が確定しました</h2>
+      <p>予約番号 <span class="mono">${bookingNo(S.pid, t.no, p.id)}</span>｜プラン ${p.id}｜${esc(p.provider)}｜${yen(p.price)}</p>
+      ${S.cfg.flowPanel ? '<p class="note">どの情報がどこへ送られたかは「情報の行き先」の情報レシートで確認できます（いずれも模擬で、実際には送信していません）。</p>' : ''}
+    </section>
+    <div class="actions"><div class="go"><button class="btn" data-action="advance" data-dest="${t.practice ? '練習を終えて、本番の説明へ進みます' : `旅行の日まで時間を進め、${esc(scn.event.when)}に予定変更が起こるかを判定します`}">${t.practice ? '練習を終える' : '旅行の日まで時間を進める'}</button></div></div>
+  </div>`;
+};
+
+SCREENS.practiceEnd = () => {
+  const p = Math.round(S.cfg.pEvent * 100);
+  return `<div class="screen"><section class="panel stack">
+    <p class="eyebrow">練習の終わり</p><h2>練習はここまでです</h2>
+    <p>本番の課題では、予約を確定したあと旅行の日まで時間が進み、各課題${p}%の確率で予定変更が起こります。予定変更が起きると、選んだプランの取消・変更条件に応じて仮想予算から損失が差し引かれます。</p>
+    <p>各課題のあとには、条件についての確認問題（5問）と、選んだ理由についての質問があります。確認問題の画面から予約画面には戻れません。</p>
+    <div class="actions"><button class="btn" data-action="next-task">本番の課題1へ進む</button></div>
+  </section></div>`;
+};
+
+SCREENS.timeline = () => {
+  const scn = curScn();
+  const total = scn.daysAhead, evDay = total - scn.event.daysBefore;
+  const pos = d => (d / total * 100).toFixed(2);
+  const dep = addDays(today(), total);
+  const o = S.cur.outcome, done = S.cur.animDone;
+  const endPos = done && o ? (o.occurred ? pos(evDay) : '100') : '0';
+  const place = scn.kind === 'hotel' ? '宿泊日' : '出発日';
+  return `<div class="screen">
+    ${stepper(4)}
+    <section class="panel stack">
+      <p class="eyebrow">⑤ 旅行の結果｜時間の経過</p>
+      <h2>${place}の${fmtDate(dep)}まで時間を進めます</h2>
+      <div class="tl" aria-hidden="true">
+        <span class="tl-flag" style="left:${pos(evDay)}%">判定：${esc(scn.event.when)}</span>
+        <div class="tl-track"></div><div class="tl-fill" id="tlFill" style="width:${endPos}%"></div>
+        <div class="tl-mark" id="tlMark" style="left:${endPos}%"></div>
+        <span class="tl-tick first" style="left:0">予約日<br>${fmtMD(today())}</span>
+        <span class="tl-tick" style="left:${pos(evDay)}%">${esc(scn.event.when)}<br>${fmtMD(addDays(today(), evDay))}</span>
+        <span class="tl-tick last" style="left:100%">${place}<br>${fmtMD(dep)}</span>
+      </div>
+      <div id="outcome" aria-live="polite">${done ? outcomeHTML() : '<p class="note" id="tlStatus">時間を進めています…</p>'}</div>
+      <div class="actions"><div class="go"><button class="btn" data-action="to-quiz"${done ? '' : ' disabled'} data-dest="条件についての確認問題（5問）へ進みます。予約画面には戻れません。">次へ（条件の確認問題）</button></div>${done ? '' : '<button class="linkbtn" data-action="skip-anim">すぐに結果を見る</button>'}</div>
+    </section>
+  </div>`;
+};
+function outcomeHTML() {
+  const o = S.cur.outcome, scn = curScn();
+  if (!o) return '';
+  if (o.occurred) {
+    return `<div class="outcome" role="status"><p class="ot">予定変更が発生しました</p><p style="margin-top:6px">${esc(scn.event.notice)}</p>
+      <dl class="outcome-rows"><dt>適用された条件</dt><dd>${esc(o.line)}</dd><dt>損失額</dt><dd class="money">${yen(o.loss)}</dd><dt>仮想残高</dt><dd class="money">${yen(o.budget)} → ${yen(o.balance)}</dd></dl></div>`;
+  }
+  return `<div class="outcome ok" role="status"><p class="ot">予定どおり旅行が実施されました</p>
+    <dl class="outcome-rows"><dt>損失額</dt><dd class="money">${yen(0)}</dd><dt>仮想残高</dt><dd class="money">${yen(o.budget)}</dd></dl></div>`;
+}
+
+SCREENS.quiz = () => {
+  const t = curTask();
+  const qs = resolveQuiz(t.scn, selectedPlan());
+  return `<div class="screen">
+    <section class="panel stack"><p class="eyebrow">課題 ${t.no} の確認（5問）</p><h2>条件についての確認問題</h2>
+      <p class="note">この画面から予約画面には戻れません。わかる範囲で答えてください。「すべて選んでください」の問題は、当てはまるものをすべて選びます。</p></section>
+    <div class="qlist">${qs.map((q, i) => quizItem(q, i)).join('')}</div>
+    <div class="actions"><button class="btn" data-action="quiz-submit">回答して次へ</button><span class="err" id="qerr" role="alert"></span></div>
+  </div>`;
+};
+function quizItem(q, i) {
+  const ans = S.cur.quizAns[q.id];
+  const multi = q.type === 'mc';
+  return `<fieldset class="lk" id="lk-${q.id}" aria-labelledby="qt-${q.id}"><div class="lk-q" id="qt-${q.id}"><span class="qn">Q${i + 1}</span><span>${esc(q.text)}</span></div>
+    <div class="opt-list">${q.options.map(o => {
+      const checked = multi ? (ans || []).includes(o) : ans === o;
+      return `<label class="opt"><input type="${multi ? 'checkbox' : 'radio'}" name="${q.id}" value="${esc(o)}" data-action="quiz-ans" data-q="${q.id}"${checked ? ' checked' : ''}><span>${esc(o)}</span></label>`;
+    }).join('')}</div></fieldset>`;
+}
+
+SCREENS.post = () => {
+  const t = curTask(), P = S.cur.post;
+  const last = S.ti === S.tasks.length - 1;
+  return `<div class="screen">
+    <section class="panel stack"><p class="eyebrow">課題 ${t.no} についての質問</p><h2>選んだプランについて教えてください</h2></section>
+    <fieldset class="lk" id="lk-REASON" aria-labelledby="qt-REASON"><div class="lk-q" id="qt-REASON"><span class="qn">1</span><span>このプランを選んだ理由として当てはまるものをすべて選んでください。</span></div>
+      <div class="opt-list">${REASON_OPTIONS.map(o => `<label class="opt"><input type="checkbox" value="${esc(o)}" data-action="reason"${P.reason.includes(o) ? ' checked' : ''}><span>${esc(o)}</span></label>`).join('')}</div>
+      <input type="text" class="free" id="reason-other" style="margin-top:8px" placeholder="「その他」を選んだ場合は内容を入力" value="${esc(P.reason_other)}" data-action="reason-other"${P.reason.includes('その他') ? '' : ' disabled'} aria-label="その他の理由">
+    </fieldset>
+    <fieldset class="lk" id="lk-REASON2" aria-labelledby="qt-REASON2"><div class="lk-q" id="qt-REASON2"><span class="qn">2</span><span>選択の決め手を一言で教えてください。</span></div>
+      <input type="text" class="free" id="reason2" value="${esc(P.reason2)}" data-action="reason2" maxlength="200" aria-labelledby="qt-REASON2"></fieldset>
+    <fieldset class="lk" id="lk-CONF" aria-labelledby="qt-CONF"><div class="lk-q" id="qt-CONF"><span class="qn">3</span><span>この選択にどの程度自信がありますか。</span></div>
+      <div class="vas${P.conf == null ? ' untouched' : ''}" id="vas"><input type="range" min="0" max="100" step="1" value="${P.conf == null ? 50 : P.conf}" id="conf" data-action="conf" aria-labelledby="qt-CONF">
+      <div class="lk-anchors"><span>0 = 全く自信がない</span><span class="vas-val" id="confVal">${P.conf == null ? '未回答（つまみを動かしてください）' : P.conf}</span><span>100 = 非常に自信がある</span></div></div></fieldset>
+    <p class="note">次の5つは、予定変更の結果をふまえてお答えください。</p>
+    <div class="qlist">${DRS_ITEMS.map((d, i) => likert(d.id, 4 + i, d.text, 5, P.drs[d.id], L5_ANCHORS)).join('')}</div>
+    <div class="actions"><button class="btn" data-action="post-submit">${last ? '結果を見る' : '次の課題へ'}</button><span class="err" id="poerr" role="alert"></span></div>
+  </div>`;
+};
+
+SCREENS.summary = () => {
+  const sm = LOG.summary || {};
+  const real = LOG.tasks.filter(t => !t.practice && t.plan_chosen);
+  const c1 = S.cfg.condition === 'C1';
+  const p = Math.round(S.cfg.pEvent * 100);
+  const bullets = DEBRIEF_BULLETS.map(b => b.replace('{P}', p)).concat(c1 ? [DEBRIEF_C1_NOTE] : [], S.cfg.flowPanel ? [DEBRIEF_FLOW_NOTE] : []);
+  const post = S.cfg.postSurveyUrl ? `${S.cfg.postSurveyUrl}${S.cfg.postSurveyUrl.includes('?') ? '&' : '?'}pid=${encodeURIComponent(S.pid)}` : '';
+  return `<div class="screen">
+    <section class="panel stack"><p class="eyebrow">すべての課題が終わりました</p><h2>結果</h2>
+      <div class="tbl-wrap"><table class="sumtable"><thead><tr><th>課題</th><th>シナリオ</th><th>選んだプラン</th><th>予定変更</th><th class="r">損失</th><th class="r">仮想残高</th></tr></thead><tbody>
+      ${real.map(t => `<tr><td>${t.task_no}</td><td>${esc(SCENARIOS[t.scenario].label)}</td><td class="mono">${t.plan_chosen}</td><td>${t.event_occurred ? 'あり' : 'なし'}</td><td class="r">${yen(t.loss_jpy || 0)}</td><td class="r">${yen(t.balance_after == null ? 0 : t.balance_after)}</td></tr>`).join('')}
+      </tbody></table></div>
+      <div class="kv">
+        <div><div class="k">仮想損失の合計</div><div class="bignum">${yen(sm.total_loss || 0)}</div></div>
+        <div><div class="k">ボーナス（最大${S.cfg.bonusMax}円）</div><div class="bignum">${yenJ(sm.bonus_jpy || 0)}</div></div>
+        <div><div class="k">完了コード</div><div class="row"><span class="codebox" id="ccode">${esc(sm.completion_code || '')}</span><button class="btn quiet small" data-action="copy-code">コピー</button></div></div>
+      </div>
+      ${S.cfg.endpoint ? `<p class="note" id="sendStatus">${S.sendStatus === 'sent' ? '回答データを送信しました。' : S.sendStatus === 'failed' ? '回答データの送信に失敗しました。完了コードを控えて、問い合わせ先にご連絡ください。' : '回答データを送信しています…'}</p>` : ''}
+      ${post ? `<div class="actions"><a class="btn" href="${esc(post)}" target="_blank" rel="noopener">事後アンケートへ進む</a></div>` : ''}
+    </section>
+    <section class="panel stack prose"><h3>この研究について</h3>
+      ${DEBRIEF.map(t => `<p>${esc(t)}</p>`).join('')}
+      <ul>${bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul>
+      ${DEBRIEF_END.map(t => `<p>${esc(t)}</p>`).join('')}
+    </section>
+    ${S.cfg.mode === 'demo' ? '<div class="actions"><button class="btn quiet" data-action="lab-open">研究者パネルでログを見る</button><button class="btn quiet" data-action="restart">最初からやり直す</button></div>' : ''}
+  </div>`;
+};
+
+/* ============================================================
+   情報の行き先（レール）
+   ============================================================ */
+const RAIL_SCREENS = ['results', 'checkout', 'confirm', 'done', 'timeline'];
+function dataItems(scn, plan) {
+  const hotel = scn.kind === 'hotel';
+  const items = [
+    { key: 'search', label: '検索条件', to: ['ota', 'prov'], purpose: hotel ? '空室・料金の照会（行き先・宿泊日・人数）' : '空席・運賃の照会（出発地・到着地・日付・人数）' },
+    { key: 'name', label: hotel ? '宿泊者の氏名' : '搭乗者の氏名', to: ['ota', 'prov'], purpose: hotel ? '宿泊者名簿の作成' : '搭乗者の確認・搭乗券の発行' },
+  ];
+  if (scn.intl) items.push({ key: 'passport', label: '生年月日・国籍・旅券番号', to: ['ota', 'prov', 'auth'], purpose: '搭乗手続きと、到着国への事前旅客情報の提出' });
+  if (hotel) items.push({ key: 'address', label: '住所', to: ['ota', 'prov'], purpose: '宿泊者名簿の作成' });
+  items.push(
+    { key: 'phone', label: '電話番号', to: ['ota', 'prov'], purpose: hotel ? '到着時刻の確認などの連絡' : '欠航・遅延時の連絡' },
+    { key: 'email', label: 'メールアドレス', to: ['ota'], purpose: '予約確認メールの送付' },
+    { key: 'card', label: 'カード情報', to: ['psp', 'card'], purpose: '支払い（SORAMADOはカード番号を受け取らず、決済代行会社が発行する「トークン」だけを受け取る）' },
+    { key: 'marketing', label: 'メールアドレス（お知らせ）', to: ['partner'], purpose: '提携先からの広告配信（希望した場合のみ）' },
+  );
+  return items;
+}
+function nodeNames(scn, plan) {
+  const hotel = scn.kind === 'hotel';
+  return {
+    you: ['あなた', 'このブラウザ'],
+    ota: ['SORAMADO', '予約サイト'],
+    prov: [plan ? plan.provider : (hotel ? 'ホテル' : '航空会社（各社）'), hotel ? '宿泊施設' : '航空会社'],
+    psp: ['決済代行会社', 'カード決済の窓口'],
+    card: ['カード会社', '請求・返金'],
+    auth: ['出入国管理当局', '到着国（事前旅客情報）'],
+    partner: ['提携先', S.cur && S.cur.marketing ? '広告配信' : '希望時のみ送信'],
+  };
+}
+function toNames(scn, plan, to) { const n = nodeNames(scn, plan); return to.map(k => n[k][0]).join('・'); }
+function itemStatus(key) {
+  const scr = S.screen;
+  if (key === 'search') return 'sent';
+  if (key === 'marketing' && !(S.cur && S.cur.marketing)) return 'off';
+  if (scr === 'done' || scr === 'timeline') return 'sent';
+  if (scr === 'confirm') return 'pending';
+  return 'unsent';
+}
+const STATUS_JA = { sent: '送信済み（模擬）', pending: '確定時に送信', unsent: '未送信', off: '送信しない' };
+
+const FLOW_NODES = {
+  you: { x: 150, y: 24, w: 136, h: 34 },
+  ota: { x: 76, y: 102, w: 128, h: 40 }, psp: { x: 224, y: 102, w: 128, h: 40 },
+  prov: { x: 76, y: 184, w: 128, h: 40 }, card: { x: 224, y: 184, w: 128, h: 40 },
+  auth: { x: 76, y: 264, w: 128, h: 40 }, partner: { x: 224, y: 264, w: 128, h: 40 },
+};
+const FLOW_EDGES = {
+  'you>ota': 'M 116 41 V 62 H 76 V 82',
+  'you>psp': 'M 184 41 V 62 H 224 V 82',
+  'ota>prov': 'M 62 122 V 164',
+  'prov>ota': 'M 90 164 V 122',
+  'psp>ota': 'M 160 95 H 140',
+  'ota>psp': 'M 140 109 H 160',
+  'psp>card': 'M 224 122 V 164',
+  'prov>auth': 'M 76 204 V 244',
+  'ota>partner': 'M 140 116 H 150 V 264 H 160',
+};
+const ITEM_EDGES = {
+  search: ['you>ota', 'ota>prov'], name: ['you>ota', 'ota>prov'], phone: ['you>ota', 'ota>prov'], address: ['you>ota', 'ota>prov'],
+  email: ['you>ota'], passport: ['you>ota', 'ota>prov', 'prov>auth'], card: ['you>psp', 'psp>card', 'psp>ota'], marketing: ['ota>partner'],
+};
+
+function flowSpec() {
+  const scn = curScn(), plan = selectedPlan();
+  const names = nodeNames(scn, plan);
+  const prov = names.prov[0];
+  const edges = {}, lines = [];
+  const set = (ks, st) => ks.forEach(k => { edges[k] = st; });
+  const items = dataItems(scn, plan);
+  const personal = items.filter(i => i.key !== 'search' && (i.key !== 'marketing' || (S.cur && S.cur.marketing)));
+  const path = it => `あなた → ${it.to.map(k => names[k][0]).join(' → ')}`;
+  const scr = S.screen, f = S.flowFocus;
+  if (scr === 'results') {
+    if (f === 'detail') {
+      set(['prov>ota'], 'active');
+      lines.push(['運賃・条件', `${prov} → SORAMADO → この画面（詳細パネル）`]);
+    } else {
+      set(['you>ota', 'ota>prov'], 'done'); set(['prov>ota'], 'active');
+      lines.push(['検索条件', `あなた → SORAMADO → ${prov}（${scn.kind === 'hotel' ? '空室' : '空席'}・料金の照会）`]);
+      lines.push(['運賃・条件', `${prov} → SORAMADO → この画面に表示`]);
+    }
+  } else if (scr === 'checkout') {
+    const it = f && items.find(i => i.key === f);
+    if (it && (it.key !== 'marketing' || S.cur.marketing)) {
+      set(ITEM_EDGES[it.key], 'active');
+      lines.push([it.label, `${it.key === 'card' ? 'あなた → 決済代行会社 → カード会社（SORAMADOにはトークンだけが届く）' : path(it)}｜${it.purpose}`]);
+      lines.push(['', 'この画面ではまだ送信されません。送信は「予約を確定する」を押したときです。']);
+    } else if (it && it.key === 'marketing') {
+      lines.push(['お知らせ', 'オフのため、提携先へは何も送られません。']);
+    } else {
+      lines.push(['', '入力欄にカーソルを合わせると、その情報の行き先がここに表示されます。この画面ではまだ何も送信されません。']);
+    }
+  } else if (scr === 'confirm') {
+    personal.forEach(it => set(ITEM_EDGES[it.key], f === 'confirm-preview' ? 'active' : 'pending'));
+    lines.push(['', f === 'confirm-preview' ? '「予約を確定する」を押すと、点線の経路で次の情報が送られます。' : '確定すると、点線の経路で次の情報が送られます。']);
+    personal.forEach(it => lines.push([it.label, it.key === 'card' ? 'あなた → 決済代行会社 → カード会社' : path(it)]));
+  } else if (scr === 'done') {
+    personal.forEach(it => set(ITEM_EDGES[it.key], 'done'));
+    lines.push(['', '予約の確定とともに、次の情報が送られました（模擬）。']);
+    personal.forEach(it => lines.push([it.label, it.key === 'card' ? 'あなた → 決済代行会社 → カード会社' : path(it)]));
+  } else if (scr === 'timeline') {
+    const o = S.cur.outcome;
+    if (!o || !S.cur.animDone) {
+      lines.push(['', '時間を進めています。予定変更が起きたときに送られる情報がここに表示されます。']);
+    } else if (!o.occurred) {
+      lines.push(['', '予定どおり旅行が実施されました。追加で送られる情報はありません。']);
+    } else if (scn.event.type === 'change' && plan.change.possible) {
+      set(['ota>prov'], 'active'); set(['prov>ota'], 'active');
+      lines.push(['日程変更の連絡', `SORAMADO → ${prov}`], ['新しい日程', `${prov} → SORAMADO`]);
+      if (plan.change.fee) { set(['you>psp', 'psp>card'], 'active'); lines.push(['変更手数料の支払い', 'あなた → 決済代行会社 → カード会社']); }
+    } else {
+      set(['ota>prov'], 'active');
+      lines.push(['取消の連絡', `SORAMADO → ${prov}`]);
+      const refund = plan.price - o.loss;
+      if (refund > 0) { set(['prov>ota', 'ota>psp', 'psp>card'], 'active'); lines.push(['返金', `${prov} → SORAMADO → 決済代行会社 → カード会社（${yen(refund)}）`]); }
+      else lines.push(['返金', 'ありません']);
+    }
+  }
+  return { edges, lines, names };
+}
+
+function flowSVG(spec) {
+  const scn = curScn();
+  const nodes = ['you', 'ota', 'psp', 'prov', 'card', 'partner'].concat(scn.intl ? ['auth'] : []);
+  const motion = !reduceMotion();
+  const on = new Set(), recv = new Set();
+  Object.entries(spec.edges).forEach(([k, st]) => {
+    const [a, b] = k.split('>');
+    if (st === 'active' || st === 'pending') { on.add(a); on.add(b); }
+    if (st === 'done') recv.add(b);
+  });
+  const edgeEls = Object.keys(FLOW_EDGES).filter(k => { const [a, b] = k.split('>'); return nodes.includes(a) && nodes.includes(b); }).map(k => {
+    const st = spec.edges[k] || 'idle', d = FLOW_EDGES[k];
+    const mk = st === 'idle' ? '' : ` marker-end="url(#ah-${st})"`;
+    const dots = st === 'active' && motion ? [0, -0.75].map(b => `<circle class="dot" r="3.2"><animateMotion dur="1.5s" begin="${b}s" repeatCount="indefinite" path="${d}"/></circle>`).join('') : '';
+    return `<path class="edge ${st}" d="${d}"${mk}/>${dots}`;
+  }).join('');
+  const nodeEls = nodes.map(k => {
+    const n = FLOW_NODES[k], [nm, rl] = spec.names[k];
+    const cls = k === 'partner' && !(S.cur && S.cur.marketing) ? 'off' : on.has(k) ? 'on' : recv.has(k) ? 'recv' : '';
+    return `<g class="node ${cls}"><rect class="box" x="${n.x - n.w / 2}" y="${n.y - n.h / 2}" width="${n.w}" height="${n.h}" rx="8"/><text class="nm" x="${n.x}" y="${n.y - (n.h > 36 ? 3 : 2)}" text-anchor="middle">${esc(nm)}</text><text class="rl" x="${n.x}" y="${n.y + (n.h > 36 ? 12 : 11)}" text-anchor="middle">${esc(rl)}</text></g>`;
+  }).join('');
+  const label = spec.lines.filter(l => l[0]).map(l => `${l[0]}：${l[1]}`).join('。') || '情報の流れの図';
+  return `<svg class="flow-svg" viewBox="0 0 300 ${scn.intl ? 290 : 290}" role="img" aria-label="${esc(label)}"><defs>${['active', 'pending', 'done'].map(s =>
+    `<marker id="ah-${s}" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path class="ah ${s}" d="M0 0L10 5L0 10z"/></marker>`).join('')}</defs>${edgeEls}${nodeEls}</svg>`;
+}
+
+function hereText() {
+  const t = curTask(), scn = curScn();
+  const idx = { results: 0, checkout: 1, confirm: 2, done: 3, timeline: 4 }[S.screen];
+  return `${esc(taskLabel(t))}（${esc(scn.label)}）› <b>${idx + 1}. ${esc(STEPS[idx])}</b>`;
+}
+function defaultDest() {
+  switch (S.screen) {
+    case 'results': return 'プランを選ぶと「② お客様情報・お支払い」へ進みます。この時点では予約は確定せず、あなたの情報も送信されません。';
+    case 'checkout': return '入力欄にカーソルを合わせると、その情報の行き先を表示します。「予約内容の確認へ」を押しても、まだ送信されません。';
+    case 'confirm': return '「予約を確定する」を押すと予約が確定し、情報が送信されます（模擬）。確定前なら「プランを選び直す」で戻れます。';
+    case 'done': return '予約は確定しました。次のボタンで旅行の日まで時間を進めます。';
+    case 'timeline': return S.cur && S.cur.animDone ? '次は条件の確認問題です。確認問題から予約画面には戻れません。' : '時間を進めています。';
+    default: return '';
+  }
+}
+function destHTML() {
+  if (S.dest) return `<span class="who">「${esc(S.dest.who)}」</span>の行き先：${esc(S.dest.text)}`;
+  return esc(defaultDest());
+}
+function receiptHTML() {
+  const scn = curScn(), plan = selectedPlan();
+  const items = dataItems(scn, plan);
+  return `<table class="receipt"><thead><tr><th>情報・状態</th><th>送信先</th></tr></thead><tbody>
+    ${items.map(i => { const st = itemStatus(i.key); return `<tr class="${S.flowFocus === i.key ? 'foc' : ''}"><td class="it"><b>${esc(i.label).replace(/・/g, '・<wbr>')}</b><span class="status ${st}">${STATUS_JA[st]}</span></td><td class="to">${esc(toNames(scn, plan, i.to)).replace(/・/g, '・<wbr>')}</td></tr>`; }).join('')}
+  </tbody></table>`;
+}
+function renderRail() {
+  const rail = $('#rail'), shell = $('#shell');
+  const show = S.cfg.flowPanel && RAIL_SCREENS.includes(S.screen) && curTask();
+  document.body.classList.toggle('rail-open', !!(show && S.railOpen));
+  if (!show) { rail.hidden = true; rail.innerHTML = ''; shell.classList.add('no-rail'); return; }
+  rail.hidden = false; shell.classList.remove('no-rail');
+  rail.classList.toggle('open', S.railOpen);
+  const spec = flowSpec();
+  const nowLine = spec.lines.find(l => l[0]) || spec.lines[0] || ['', ''];
+  rail.innerHTML = `
+    <button class="rail-toggle" data-action="rail-toggle" aria-expanded="${S.railOpen}"><span class="rt-title">情報の行き先</span><span class="rt-now">${esc(nowLine[0] ? nowLine[0] + '：' + nowLine[1] : nowLine[1])}</span><span class="rt-chev">${S.railOpen ? '閉じる' : '開く'}</span></button>
+    <div class="rail-top"><h2>情報の行き先</h2><span class="live">いま表示中</span></div>
+    <div class="rail-body">
+      <section><h3>いまいる場所</h3><p class="here-box">${hereText()}</p></section>
+      <section><h3>この操作の行き先</h3><p class="next-box" id="nextBox">${destHTML()}</p></section>
+      <section><h3>情報の流れ</h3>${flowSVG(spec)}<ul class="flow-now">${spec.lines.map(([w, t]) => `<li><span>${w ? `<span class="what">${esc(w)}</span>：` : ''}${esc(t)}</span></li>`).join('')}</ul></section>
+      <section><h3>情報レシート</h3><div class="tbl-wrap">${receiptHTML()}</div></section>
+      <p class="labnote">研究用ログ：このサイトでの操作（クリック・閲覧時間など）だけを匿名で記録しています。入力欄の氏名やカード番号は架空の値で、記録も送信もしません。</p>
+    </div>`;
+}
+
+/* ============================================================
+   actions.js — 画面遷移・操作・記録
+   ============================================================ */
+const SCREEN_TITLES = {
+  welcome: 'はじめに', resume: '前回の続き', declined: '終了', narrow: '画面幅の確認', profile: '事前の質問', brief: '課題の説明',
+  results: '検索結果', checkout: 'お客様情報・お支払い', confirm: '予約内容の確認', done: '予約完了', practiceEnd: '練習の終わり',
+  timeline: '旅行の結果', quiz: '条件の確認問題', post: '課題についての質問', summary: '結果',
+};
+
+function render(opts) {
+  const o = opts || {};
+  const y = window.scrollY;
+  renderTop();
+  const fn = SCREENS[S.screen] || SCREENS.welcome;
+  $('#main').innerHTML = fn();
+  afterRender();
+  renderRail();
+  renderLabFab();
+  if (o.keepScroll) window.scrollTo(0, y);
+}
+function rerender() { flushDwell(); render({ keepScroll: true }); persistSoon(); }
+
+function go(screen, opts) {
+  const o = opts || {};
+  flushDwell();
+  if (S.drawerPlan) closeDrawer(true);
+  S.screen = screen; S.dest = null; S.flowFocus = null; S._destEl = null;
+  render();
+  if (!o.keepScroll) window.scrollTo(0, 0);
+  const m = $('#main'); if (m && !o.noFocus) m.focus({ preventScroll: true });
+  announce(SCREEN_TITLES[screen] || '');
+  persist();
+}
+
+function afterRender() {
+  if (S.screen === 'results' || S.screen === 'confirm') bindDwell();
+  if (S.screen === 'results') markResultsShown();
+  if (S.screen === 'timeline' && S.cur && !S.cur.animDone) runTimeline();
+}
+
+function announce(t) { const l = $('#live'); if (!l) return; l.textContent = ''; setTimeout(() => { l.textContent = t; }, 60); }
+function toast(msg) {
+  const r = $('#toast-root'); if (!r) return;
+  r.innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`;
+  clearTimeout(toast._t); toast._t = setTimeout(() => { r.innerHTML = ''; }, 2800);
+}
+async function copyText(text, fallbackEl) {
+  try { await navigator.clipboard.writeText(text); toast('コピーしました'); return true; }
+  catch (e) {
+    if (fallbackEl) { fallbackEl.value = text; fallbackEl.focus(); fallbackEl.select(); toast('自動でコピーできない環境です。選択された文字をコピーしてください'); }
+    else toast('コピーできませんでした');
+    return false;
+  }
+}
+
+/* ---------- セッション ---------- */
+function initMeta() {
+  LOG.meta = {
+    app: 'SORAMADO microworld', app_version: APP_VERSION, participant_id: S.pid,
+    condition: S.cfg.condition, latin_order: S.cfg.latinOrder, mode: S.cfg.mode,
+    flow_panel: S.cfg.flowPanel, rr_map: S.cfg.rrMap, loss_source: S.cfg.lossSource, p_event: S.cfg.pEvent,
+    cutoffs: S.cfg.cutoffs.slice(), lmax: S.cfg.lmax, stage_override: S.cfg.stageOverride || null,
+    started_ts: S.startedTs, user_agent: navigator.userAgent, screen_width: window.innerWidth, screen_height: window.innerHeight,
+    demo_jump: null,
+  };
+  logEv('session_start', { condition: S.cfg.condition, latin_order: S.cfg.latinOrder, mode: S.cfg.mode });
+}
+function resetSession(newPid) {
+  Object.keys(LOG).forEach(k => { delete LOG[k]; });
+  Object.assign(LOG, { meta: {}, consent: null, profile: null, tasks: [], events: [], summary: null });
+  Object.assign(S, {
+    tasks: [], ti: 0, cur: null, recIdx: -1, profile: { answers: {}, result: null }, stageManual: null, totalLoss: 0,
+    consentChecked: false, finished: false, sendStatus: '', startedTs: Date.now(), todayTs: Date.now(), railOpen: false, pendingResume: null,
+  });
+  S.pid = newPid || randomPid();
+  storeClear();
+  initMeta();
+}
+function persist() {
+  if (S.screen === 'resume' || S.screen === 'narrow') return;
+  storeSave({
+    v: 1, cfg: S.cfg, pid: S.pid, screen: S.screen, tasks: S.tasks, ti: S.ti, cur: S.cur, recIdx: S.recIdx,
+    profile: S.profile, stageManual: S.stageManual, totalLoss: S.totalLoss, consentChecked: S.consentChecked,
+    startedTs: S.startedTs, todayTs: S.todayTs, finished: S.finished, sendStatus: S.sendStatus, LOG,
+  });
+}
+let _persistT = null;
+function persistSoon() { clearTimeout(_persistT); _persistT = setTimeout(persist, 400); }
+function restore(st) {
+  Object.assign(S.cfg, st.cfg || {});
+  Object.assign(S, {
+    pid: st.pid, tasks: st.tasks || [], ti: st.ti || 0, cur: st.cur, recIdx: st.recIdx, profile: st.profile || { answers: {}, result: null },
+    stageManual: st.stageManual || null, totalLoss: st.totalLoss || 0, consentChecked: !!st.consentChecked,
+    startedTs: st.startedTs || Date.now(), todayTs: st.todayTs || Date.now(), finished: !!st.finished, sendStatus: st.sendStatus || '',
+  });
+  Object.keys(LOG).forEach(k => { delete LOG[k]; });
+  Object.assign(LOG, st.LOG);
+  if (S.cur) { S.cur.dwellOpen = {}; S.cur.detailOpenAt = null; }
+  logEv('resume', { screen: st.screen });
+  S.screen = st.screen;
+}
+
+/* ---------- 課題の流れ ---------- */
+function buildTasks() {
+  const t = [];
+  if (S.cfg.showPractice) t.push({ no: 0, scn: 'PRACTICE', practice: true });
+  LATIN[S.cfg.latinOrder].forEach((k, i) => t.push({ no: i + 1, scn: k, practice: false }));
+  return t;
+}
+function startTasks() { S.tasks = buildTasks(); S.ti = 0; beginTask(); }
+function beginTask() {
+  const t = curTask();
+  S.cur = newCur();
+  const r = newTaskRecord(t.no, t.scn, t.practice);
+  r.stage_measured = stageMeasured();
+  LOG.tasks.push(r); S.recIdx = LOG.tasks.length - 1;
+  logEv('task_start', { task_no: t.no, scenario: t.scn, practice: !!t.practice });
+  go('brief');
+}
+function nextTask() { if (S.ti < S.tasks.length - 1) { S.ti++; beginTask(); } else finish(); }
+function demoJump(k) {
+  if (S.labOpen) closeLab();
+  resetSession(S.pid);
+  LOG.meta.demo_jump = k;
+  LOG.consent = { agreed: null, skipped: 'demo_jump', ts: Date.now() };
+  const no = k === 'PRACTICE' ? 0 : LATIN[S.cfg.latinOrder].indexOf(k) + 1;
+  S.tasks = [{ no, scn: k, practice: k === 'PRACTICE' }]; S.ti = 0;
+  logEv('demo_jump', { scenario: k });
+  S.cur = newCur();
+  const r = newTaskRecord(no, k, k === 'PRACTICE');
+  LOG.tasks.push(r); S.recIdx = LOG.tasks.length - 1;
+  logEv('task_start', { task_no: no, scenario: k, practice: k === 'PRACTICE' });
+  go('results');
+}
+function doConsent() {
+  LOG.consent = { agreed: true, ts: Date.now() };
+  LOG.meta.screen_width = window.innerWidth; LOG.meta.screen_height = window.innerHeight;
+  logEv('consent');
+  if (S.cfg.showProfile) go('profile'); else startTasks();
+}
+function submitProfile() {
+  const ans = S.profile.answers;
+  $$('.lk').forEach(el => el.classList.remove('missing'));
+  const missing = PROFILE_ITEMS.filter(i => ans[i.id] == null);
+  if (missing.length) {
+    missing.forEach(i => { const el = $('#lk-' + i.id); if (el) el.classList.add('missing'); });
+    $('#perr').textContent = `未回答の項目があります（${missing.length}問）。`;
+    const first = $('#lk-' + missing[0].id); if (first) first.scrollIntoView({ block: 'center' });
+    return;
+  }
+  const res = computeProfile(ans, S.cfg.cutoffs);
+  S.profile.result = res;
+  LOG.profile = Object.assign({ answers: Object.assign({}, ans), cutoffs: S.cfg.cutoffs.slice() }, res);
+  logEv('profile_submit', { stage: res.stage, composite: res.composite, att1_pass: res.att1_pass });
+  startTasks();
+}
+function markResultsShown() {
+  const r = rec(); if (!r || r.results_shown_ts) return;
+  r.results_shown_ts = Date.now();
+  r.sort_initial = S.cur.sort;
+  r.order_initial = sortPlans(curScn(), S.cur.sort, S.cfg).map(p => p.id);
+  if (S.cfg.condition === 'C3') r.stage_displayed_initial = stageDisplayed();
+  logEv('results_shown', { sort: S.cur.sort, order: r.order_initial });
+}
+function selectPlan(id) {
+  const r = rec();
+  if (!r.first_select_ts) { r.first_select_ts = Date.now(); r.choice_time_ms = r.first_select_ts - (r.results_shown_ts || r.first_select_ts); }
+  if (S.cur.selected && S.cur.selected !== id) r.plan_switches++;
+  S.cur.selected = id;
+  logEv('select', { plan: id });
+  go('checkout');
+}
+function confirmBooking() {
+  const scn = curScn(), p = selectedPlan(), r = rec();
+  r.confirm_ts = Date.now();
+  r.decision_time_ms = r.confirm_ts - (r.results_shown_ts || r.confirm_ts);
+  r.plan_chosen = p.id; r.price_chosen = p.price; r.risk_grade_chosen = p.grade;
+  r.cheapest_selected = p.id === cheapestOf(scn).id ? 1 : 0;
+  r.assumed_loss_chosen = lossOf(scn, p, S.cfg); r.savings_chosen = savingsOf(scn, p);
+  r.stage_displayed_at_choice = S.cfg.condition === 'C3' ? stageDisplayed() : null;
+  r.alignment_score = alignmentScore(r.stage_measured, p.grade);
+  r.marketing_optin = S.cur.marketing ? 1 : 0;
+  r.compare_actions = r.sort_changes + r.compare_toggles + r.expand_toggles + r.map_interactions + r.table_interactions;
+  logEv('confirm_booking', { plan: p.id, price: p.price, grade: p.grade });
+  go('done');
+}
+function judgeEvent() {
+  if (S.cur.outcome) return S.cur.outcome;
+  const t = curTask(), scn = curScn(), p = selectedPlan(), r = rec();
+  const d = eventDraw(S.pid, t.no, S.cfg.pEvent);
+  const loss = d.occurred ? lossOf(scn, p, S.cfg) : 0;
+  S.cur.outcome = { seed: d.seed, rand: d.rand, occurred: d.occurred, loss, budget: scn.budget, balance: scn.budget - loss, line: d.occurred ? appliedLine(scn, p, S.cfg) : '' };
+  Object.assign(r, { event_seed: d.seed, event_rand: d.rand, event_occurred: d.occurred ? 1 : 0, loss_jpy: loss, budget: scn.budget, balance_after: scn.budget - loss });
+  S.totalLoss += loss;
+  logEv('event_judged', { task_no: t.no, seed: d.seed, rand: d.rand, occurred: d.occurred, loss });
+  persist();
+  return S.cur.outcome;
+}
+let tlTimers = [];
+function runTimeline() {
+  const o = judgeEvent();
+  const scn = curScn();
+  const evPct = (scn.daysAhead - scn.event.daysBefore) / scn.daysAhead * 100;
+  const mark = $('#tlMark'), fill = $('#tlFill');
+  tlTimers.forEach(clearTimeout); tlTimers = [];
+  if (reduceMotion() || !mark || !fill) { finishTimeline(); return; }
+  tlTimers.push(setTimeout(() => { mark.style.left = evPct + '%'; fill.style.width = evPct + '%'; }, 80));
+  if (o.occurred) tlTimers.push(setTimeout(finishTimeline, 1850));
+  else {
+    tlTimers.push(setTimeout(() => {
+      const st = $('#tlStatus'); if (st) st.textContent = `${scn.event.when}：予定変更はありませんでした。旅行の日まで進めています…`;
+      mark.style.transitionDuration = '0.9s'; fill.style.transitionDuration = '0.9s';
+      mark.style.left = '100%'; fill.style.width = '100%';
+    }, 1900));
+    tlTimers.push(setTimeout(finishTimeline, 2950));
+  }
+}
+function finishTimeline() {
+  tlTimers.forEach(clearTimeout); tlTimers = [];
+  if (!S.cur || S.screen !== 'timeline' || S.cur.animDone) return;
+  S.cur.animDone = true;
+  const o = S.cur.outcome;
+  logEv('outcome_shown', { occurred: o.occurred, loss: o.loss });
+  render({ keepScroll: true });
+  announce(o.occurred ? `予定変更が発生しました。損失は${yenJ(o.loss)}です。` : '予定どおり旅行が実施されました。');
+  persist();
+}
+function submitQuiz() {
+  const t = curTask(), qs = resolveQuiz(t.scn, selectedPlan());
+  $$('.lk').forEach(el => el.classList.remove('missing'));
+  const missing = qs.filter(q => { const a = S.cur.quizAns[q.id]; return q.type === 'mc' ? !(a && a.length) : a == null; });
+  if (missing.length) {
+    missing.forEach(q => { const el = $('#lk-' + q.id); if (el) el.classList.add('missing'); });
+    $('#qerr').textContent = `未回答の問題があります（${missing.length}問）。`;
+    const first = $('#lk-' + missing[0].id); if (first) first.scrollIntoView({ block: 'center' });
+    return;
+  }
+  const r = rec();
+  let sum = 0;
+  qs.forEach((q, i) => {
+    const a = S.cur.quizAns[q.id], c = scoreAnswer(q, a);
+    sum += c;
+    r.quiz['q' + (i + 1)] = { id: q.id, answer: a, correct: c, key: q.correct, options: q.options };
+  });
+  r.comprehension_score = Math.round(sum / qs.length * 1000) / 1000;
+  r.quiz_time_ms = Date.now() - (S.cur.quizStart || Date.now());
+  logEv('quiz_submit', { task_no: t.no, score: r.comprehension_score });
+  go('post');
+}
+function setConf(v) {
+  if (!S.cur || S.screen !== 'post') return;
+  S.cur.post.conf = Math.round(+v);
+  const el = $('#confVal'); if (el) el.textContent = String(S.cur.post.conf);
+  const vas = $('#vas'); if (vas) vas.classList.remove('untouched');
+  const box = $('#lk-CONF'); if (box) box.classList.remove('missing');
+  persistSoon();
+}
+function submitPost() {
+  const P = S.cur.post;
+  $$('.lk').forEach(el => el.classList.remove('missing'));
+  const miss = [];
+  if (!P.reason.length || (P.reason.includes('その他') && !P.reason_other.trim())) miss.push('REASON');
+  if (P.conf == null) miss.push('CONF');
+  DRS_ITEMS.forEach(d => { if (P.drs[d.id] == null) miss.push(d.id); });
+  if (miss.length) {
+    miss.forEach(id => { const el = $('#lk-' + id); if (el) el.classList.add('missing'); });
+    $('#poerr').textContent = '未回答の質問があります。' + (miss.includes('REASON') && P.reason.includes('その他') && !P.reason_other.trim() ? '「その他」の内容も入力してください。' : '');
+    const first = $('#lk-' + miss[0]); if (first) first.scrollIntoView({ block: 'center' });
+    return;
+  }
+  const r = rec();
+  Object.assign(r, { reason: P.reason.slice(), reason_other: P.reason_other.trim(), reason2: P.reason2.trim(), conf: P.conf, drs: Object.assign({}, P.drs) });
+  r.compare_actions = r.sort_changes + r.compare_toggles + r.expand_toggles + r.map_interactions + r.table_interactions;
+  logEv('post_submit', { task_no: curTask().no });
+  logEv('task_end', { task_no: curTask().no });
+  if (S.cfg.endpoint && S.cfg.mode === 'exp') sendLog(S.cfg.endpoint, 'task_end');
+  nextTask();
+}
+function finish() {
+  const L = S.totalLoss;
+  const dur = Math.round((Date.now() - S.startedTs) / 1000);
+  LOG.summary = {
+    total_loss: L, bonus_jpy: bonusOf(L, S.cfg), completion_code: completionCode(S.pid, L), total_duration_s: dur, finished_ts: Date.now(),
+    quality: {
+      e1_under_7min: dur < 420 ? 1 : 0,
+      att1_pass: LOG.profile ? LOG.profile.att1_pass : null,
+      straightline_profile: LOG.profile ? LOG.profile.straightline : null,
+      e6_screen_width_ok: (LOG.meta.screen_width || 0) >= S.cfg.minWidth ? 1 : 0,
+      demo_jump: LOG.meta.demo_jump || null,
+    },
+  };
+  S.finished = true;
+  logEv('finish', { total_loss: L });
+  if (S.cfg.endpoint) S.sendStatus = 'sending';
+  go('summary');
+  if (S.cfg.endpoint) {
+    sendLog(S.cfg.endpoint, 'finish').then(res => {
+      S.sendStatus = res.ok ? 'sent' : 'failed';
+      logEv('log_sent', { ok: res.ok });
+      const el = $('#sendStatus');
+      if (el) el.textContent = res.ok ? '回答データを送信しました。' : '回答データの送信に失敗しました。完了コードを控えて、問い合わせ先にご連絡ください。';
+      persist();
+    });
+  }
+}
+function changeStage(to) {
+  const from = stageDisplayed();
+  if (!STAGES[to] || to === from) return;
+  S.stageManual = to;
+  const r = rec(); if (r) r.stage_changes++;
+  logEv('stage_change', { from, to, screen: S.screen });
+  const v = view();
+  if (S.cur && !S.cur.userSorted) S.cur.sort = v.defaultSort;
+  if (S.cur && !S.cur.userCompare) S.cur.compareOpen = v.compareDefaultOpen;
+  rerender();
+}
+
+/* ---------- 閲覧時間・強調 ---------- */
+function bindDwell() {
+  $$('.plan[data-plan]').forEach(el => {
+    const id = el.dataset.plan;
+    el.addEventListener('pointerenter', () => { dwellStart(id); highlight(id, 'card'); });
+    el.addEventListener('pointerleave', () => { dwellEnd(id); if (S.cur && S.cur.hl === id) highlight(null, 'card'); });
+    el.addEventListener('focusin', () => dwellStart(id));
+    el.addEventListener('focusout', e => { if (!el.contains(e.relatedTarget)) dwellEnd(id); });
+  });
+}
+function dwellStart(id) { if (S.cur && S.cur.dwellOpen[id] == null) S.cur.dwellOpen[id] = performance.now(); }
+function dwellEnd(id) {
+  if (!S.cur) return;
+  const st = S.cur.dwellOpen[id];
+  if (st == null) return;
+  const r = rec(); if (r) r.dwell_ms[id] = (r.dwell_ms[id] || 0) + Math.round(performance.now() - st);
+  delete S.cur.dwellOpen[id];
+}
+function flushDwell() { if (S.cur && S.cur.dwellOpen) Object.keys(S.cur.dwellOpen).forEach(dwellEnd); }
+function highlight(id, src) {
+  if (!S.cur) return;
+  const prev = S.cur.hl;
+  S.cur.hl = id;
+  $$('.rrmap .mk').forEach(m => m.classList.toggle('hl', m.dataset.mk === id));
+  $$('.ctable tr[data-row]').forEach(r => r.classList.toggle('hl', r.dataset.row === id));
+  if (src !== 'card') $$('.plans .plan[data-plan]').forEach(c => c.classList.toggle('hl', c.dataset.plan === id));
+  if (src === 'map' && id && id !== prev) { const r = rec(); if (r) r.map_hovers++; logEv('map_hover', { plan: id }); }
+}
+function scrollToPlan(id) {
+  const el = document.getElementById('plan-' + id); if (!el) return;
+  el.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
+  el.classList.add('hl'); setTimeout(() => el.classList.remove('hl'), 1800);
+  const b = el.querySelector('[data-action="select"]'); if (b) b.focus({ preventScroll: true });
+}
+
+/* ---------- 詳細パネル ---------- */
+function openDrawer(id, trigger) {
+  const r = rec();
+  S.drawerPlan = id; S.drawerReturn = trigger || null;
+  S.cur.detailOpenAt = performance.now();
+  if (r) r.detail_opens++;
+  logEv('detail_open', { plan: id, screen: S.screen });
+  $('#drawer-root').innerHTML = drawerHTML(id);
+  document.body.style.overflow = 'hidden';
+  if (S.screen === 'results') { S.flowFocus = 'detail'; renderRail(); }
+  const c = $('#dr-close'); if (c) c.focus();
+}
+function closeDrawer(silent) {
+  if (!S.drawerPlan) return;
+  const id = S.drawerPlan, r = rec();
+  const ms = Math.round(performance.now() - (S.cur && S.cur.detailOpenAt ? S.cur.detailOpenAt : performance.now()));
+  if (r) r.detail_ms[id] = (r.detail_ms[id] || 0) + ms;
+  logEv('detail_close', { plan: id, ms });
+  S.drawerPlan = null; if (S.cur) S.cur.detailOpenAt = null;
+  $('#drawer-root').innerHTML = '';
+  document.body.style.overflow = '';
+  if (S.flowFocus === 'detail') S.flowFocus = null;
+  const ret = S.drawerReturn; S.drawerReturn = null;
+  if (!silent) { renderRail(); if (ret && document.contains(ret)) ret.focus(); }
+}
+function trapFocus(e, box) {
+  if (!box) return;
+  const f = $$('a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])', box).filter(x => x.offsetParent !== null || x === document.activeElement);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+
+/* ---------- 「この操作の行き先」と情報の流れ ---------- */
+const DEST_LOG_ACTIONS = ['select', 'detail', 'to-confirm', 'confirm-booking', 'back-results', 'advance', 'to-quiz', 'brief-go'];
+function labelOf(el) { return (el.dataset.label || el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 24); }
+function setDest(el) {
+  const prev = S._destInfo;
+  if (prev && prev.t != null) {
+    const ms = Math.round(performance.now() - prev.t);
+    if (ms >= 400 && DEST_LOG_ACTIONS.includes(prev.action)) logEv('dest_view', { action: prev.action, plan: prev.plan || null, ms });
+  }
+  S._destInfo = el ? { t: performance.now(), action: el.dataset.action, plan: el.dataset.plan } : null;
+  S.dest = el ? { who: labelOf(el), text: el.dataset.dest } : null;
+  const nb = $('#nextBox'); if (nb) nb.innerHTML = destHTML();
+}
+function setFlowFocus(key, how) {
+  if (key === S.flowFocus) return;
+  S.flowFocus = key;
+  if (key && ITEM_EDGES[key] && how) { const r = rec(); if (r) r.flow_interactions++; logEv('flow_focus', { key, how }); }
+  $$('.field[data-flow]').forEach(f => f.classList.toggle('focus', f.dataset.flow === key));
+  renderRail();
+}
+function flowKeyAt(node) { const f = node && node.closest ? node.closest('[data-flow]') : null; return f ? f.dataset.flow : null; }
+
+function onOver(e) {
+  const d = e.target.closest && e.target.closest('[data-dest]');
+  if (d && d !== S._destEl) { S._destEl = d; setDest(d); }
+  if (!RAIL_SCREENS.includes(S.screen)) return;
+  const fk = flowKeyAt(e.target);
+  if (fk) setFlowFocus(fk, 'hover');
+  else if (e.target.closest && e.target.closest('[data-flowpreview]')) setFlowFocus('confirm-preview', null);
+  const mk = e.target.closest && e.target.closest('.ptg[data-plan]');
+  if (mk) highlight(mk.dataset.plan, 'map');
+  const tr = e.target.closest && e.target.closest('tr[data-row]');
+  if (tr) highlight(tr.dataset.row, 'table');
+}
+function onOut(e) {
+  const to = e.relatedTarget;
+  const d = e.target.closest && e.target.closest('[data-dest]');
+  if (d && !(to && d.contains(to))) {
+    const nd = to && to.closest ? to.closest('[data-dest]') : null;
+    if (!nd) { S._destEl = null; setDest(null); }
+  }
+  if (!RAIL_SCREENS.includes(S.screen)) return;
+  const f = e.target.closest && e.target.closest('[data-flow],[data-flowpreview]');
+  if (f && !(to && f.contains(to))) {
+    const nk = flowKeyAt(to) || flowKeyAt(document.activeElement);
+    setFlowFocus(nk, null);
+  }
+  const mk = e.target.closest && e.target.closest('.ptg[data-plan],tr[data-row]');
+  if (mk && !(to && mk.contains(to))) highlight(null, 'map-out');
+}
+function onFocusIn(e) {
+  const d = e.target.closest && e.target.closest('[data-dest]');
+  if (d) { S._destEl = d; setDest(d); }
+  if (!RAIL_SCREENS.includes(S.screen)) return;
+  const fk = flowKeyAt(e.target);
+  if (fk) setFlowFocus(fk, 'focus');
+  else if (e.target.closest && e.target.closest('[data-flowpreview]')) setFlowFocus('confirm-preview', null);
+}
+function onFocusOut(e) {
+  const to = e.relatedTarget;
+  if (S._destEl && !(to && S._destEl.contains(to))) { S._destEl = null; setDest(null); }
+  if (!RAIL_SCREENS.includes(S.screen)) return;
+  if (flowKeyAt(e.target) || (e.target.closest && e.target.closest('[data-flowpreview]'))) setFlowFocus(flowKeyAt(to), null);
+}
+
+/* ---------- イベント処理 ---------- */
+function onClick(e) {
+  const el = e.target.closest && e.target.closest('[data-action]');
+  if (!el || el.tagName === 'INPUT') return;
+  const a = el.dataset.action, id = el.dataset.plan, v = el.dataset.v;
+  const r = rec();
+  switch (a) {
+    case 'consent-yes': return doConsent();
+    case 'consent-no': LOG.consent = { agreed: false, ts: Date.now() }; logEv('consent_declined'); return go('declined');
+    case 'resume-yes': { const st = S.pendingResume; S.pendingResume = null; restore(st); return go(S.screen, { noFocus: false }); }
+    case 'resume-no': S.pendingResume = null; resetSession(); return go(S.cfg.mode === 'exp' && window.innerWidth < S.cfg.minWidth ? 'narrow' : 'welcome');
+    case 'recheck-width': if (window.innerWidth >= S.cfg.minWidth) { LOG.meta.screen_width = window.innerWidth; return go('welcome'); } return render();
+    case 'profile-submit': return submitProfile();
+    case 'brief-go': logEv('brief_continue'); return go('results');
+    case 'sort':
+      if (S.cur.sort !== v) { S.cur.sort = v; S.cur.userSorted = true; r.sort_changes++; logEv('sort', { to: v }); rerender(); }
+      return;
+    case 'select': return selectPlan(id);
+    case 'detail': return openDrawer(id, el);
+    case 'detail-close': return closeDrawer();
+    case 'expand': {
+      const open = S.cur.expanded.includes(id);
+      S.cur.expanded = open ? S.cur.expanded.filter(x => x !== id) : S.cur.expanded.concat([id]);
+      r.expand_toggles++; logEv('expand', { plan: id, open: !open });
+      rerender();
+      const btn = $(`[data-action="expand"][data-plan="${id}"]`); if (btn) btn.focus({ preventScroll: true });
+      return;
+    }
+    case 'compare-toggle':
+      S.cur.compareOpen = !S.cur.compareOpen; S.cur.userCompare = true; r.compare_toggles++;
+      logEv('compare_toggle', { open: S.cur.compareOpen }); return rerender();
+    case 'map-point': r.map_interactions++; logEv('map_click', { plan: id }); return scrollToPlan(id);
+    case 'table-row': r.table_interactions++; logEv('table_click', { plan: id }); return scrollToPlan(id);
+    case 'stage-toggle': S.cur.stagePickerOpen = !S.cur.stagePickerOpen; logEv('stage_picker', { open: S.cur.stagePickerOpen }); return rerender();
+    case 'back-results': logEv('back_results', { from: S.screen }); return go('results');
+    case 'to-confirm': logEv('to_confirm'); return go('confirm');
+    case 'confirm-booking': return confirmBooking();
+    case 'advance':
+      if (curTask().practice) { logEv('practice_end'); return go('practiceEnd'); }
+      return go('timeline');
+    case 'skip-anim': logEv('skip_anim'); return finishTimeline();
+    case 'to-quiz': S.cur.quizStart = Date.now(); logEv('quiz_start'); return go('quiz');
+    case 'quiz-submit': return submitQuiz();
+    case 'post-submit': return submitPost();
+    case 'next-task': return nextTask();
+    case 'rail-toggle':
+      S.railOpen = !S.railOpen;
+      if (S.railOpen && r) r.flow_interactions++;
+      logEv('rail_toggle', { open: S.railOpen }); return renderRail();
+    case 'copy-code': return copyText((LOG.summary && LOG.summary.completion_code) || '');
+    case 'restart': resetSession(); return go('welcome');
+    case 'demo-cond': S.cfg.condition = v; LOG.meta.condition = v; logEv('demo_condition', { condition: v }); return render({ keepScroll: true });
+    case 'demo-stage': S.cfg.stageOverride = v; LOG.meta.stage_override = v || null; return render({ keepScroll: true });
+    case 'demo-jump': return demoJump(v);
+    default: return labAction(a, el);
+  }
+}
+function onChange(e) {
+  const el = e.target, a = el.dataset ? el.dataset.action : null;
+  if (!a) return;
+  switch (a) {
+    case 'consent-check': {
+      S.consentChecked = el.checked;
+      const b = $('[data-action="consent-yes"]'); if (b) b.disabled = !el.checked;
+      return;
+    }
+    case 'lk': {
+      const id = el.dataset.id, val = +el.value;
+      if (S.screen === 'profile') S.profile.answers[id] = val;
+      else if (S.screen === 'post') S.cur.post.drs[id] = val;
+      const box = $('#lk-' + id); if (box) box.classList.remove('missing');
+      return persistSoon();
+    }
+    case 'quiz-ans': {
+      const q = el.dataset.q;
+      if (el.type === 'checkbox') {
+        const cur = S.cur.quizAns[q] || [];
+        S.cur.quizAns[q] = el.checked ? cur.concat([el.value]) : cur.filter(x => x !== el.value);
+      } else S.cur.quizAns[q] = el.value;
+      const box = $('#lk-' + q); if (box) box.classList.remove('missing');
+      return persistSoon();
+    }
+    case 'reason': {
+      const P = S.cur.post;
+      P.reason = el.checked ? P.reason.concat([el.value]) : P.reason.filter(x => x !== el.value);
+      const other = $('#reason-other'); if (other) other.disabled = !P.reason.includes('その他');
+      const box = $('#lk-REASON'); if (box) box.classList.remove('missing');
+      return persistSoon();
+    }
+    case 'conf': return setConf(el.value);
+    case 'stage-pick': return changeStage(el.value);
+    case 'marketing': {
+      S.cur.marketing = el.checked;
+      const r = rec(); if (r) r.marketing_optin = el.checked ? 1 : 0;
+      logEv('marketing', { on: el.checked });
+      S.flowFocus = null; setFlowFocus('marketing', 'toggle');
+      return persistSoon();
+    }
+    default: return;
+  }
+}
+function onInput(e) {
+  const el = e.target, a = el.dataset ? el.dataset.action : null;
+  if (a === 'conf') setConf(el.value);
+  else if (a === 'reason-other' && S.cur) { S.cur.post.reason_other = el.value; persistSoon(); }
+  else if (a === 'reason2' && S.cur) { S.cur.post.reason2 = el.value; persistSoon(); }
+}
+function onKey(e) {
+  if (e.key === 'Escape') {
+    if (S.drawerPlan) { e.preventDefault(); return closeDrawer(); }
+    if (S.labOpen) { e.preventDefault(); return closeLab(); }
+  }
+  if (e.key === 'Tab') {
+    if (S.drawerPlan) trapFocus(e, $('.drawer'));
+    else if (S.labOpen) trapFocus(e, $('.lab'));
+  }
+  const tgt = e.target;
+  if ((e.key === 'Enter' || e.key === ' ') && tgt && tgt.matches && tgt.matches('[role="button"][data-action], tr[data-action]')) {
+    e.preventDefault();
+    tgt.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  }
+}
+
+/* ============================================================
+   lab.js — 研究者パネル（条件設定・再現性確認・割付表・ログ書き出し）
+   ============================================================ */
+let DL = null; // downloads capability（Artifact表示時のみ）
+async function initDownloads() {
+  try { if (window.claude && typeof window.claude.use === 'function') DL = await window.claude.use('downloads'); } catch (e) { DL = null; }
+}
+async function saveFile(filename, text) {
+  const data = filename.endsWith('.csv') ? '﻿' + text : text; // Excelで文字化けしないようBOM付き
+  if (DL) {
+    try { await DL.save({ filename, data }); toast('保存しました'); return; }
+    catch (e) { if (e && e.code === 'declined') { toast('保存を取り消しました'); return; } }
+  }
+  try {
+    const blob = new Blob([data], { type: filename.endsWith('.csv') ? 'text/csv;charset=utf-8' : 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    toast('保存を開始しました。保存されない場合は「コピー」を使ってください');
+  } catch (e) { toast('この環境では保存できません。「コピー」を使ってください'); }
+}
+const fileStem = () => `soramado_${S.pid}_${S.cfg.condition}`;
+
+function renderLabFab() {
+  if (S.labOpen) return;
+  const show = S.cfg.mode === 'demo' || S.cfg.lab;
+  $('#lab-root').innerHTML = show
+    ? `<button class="lab-fab" data-action="lab-open" aria-label="研究者パネルを開く"><span class="lab-fab-text">研究者パネル</span><span class="cond-tag">${esc(S.cfg.condition)}${S.cfg.condition === 'C3' ? '・' + esc(stageDisplayed()) : ''}</span></button>`
+    : '';
+}
+function openLab() {
+  S.labReturn = document.activeElement;
+  S.labOpen = true;
+  $('#lab-root').innerHTML = labHTML();
+  const h = $('#lab-h'); if (h) h.focus();
+  logEv('lab_open');
+}
+function closeLab() {
+  S.labOpen = false;
+  $('#lab-root').innerHTML = '';
+  renderLabFab();
+  const ret = S.labReturn; S.labReturn = null;
+  if (ret && document.contains(ret)) ret.focus();
+}
+
+function stimTable() {
+  const rows = [];
+  ['DOM', 'INT', 'HOTEL', 'PRACTICE'].forEach(k => {
+    const scn = SCENARIOS[k];
+    scn.plans.forEach(p => {
+      const rl = rulesLoss(scn, p), sh = p.sheetLoss;
+      rows.push(`<tr><td>${esc(scn.label)}</td><td class="mono">${p.id}</td><td class="mono">${fmtN(p.price)}</td><td>${p.grade}</td><td class="mono">${fmtN(rl)}</td><td class="mono">${sh == null ? '—' : fmtN(sh)}</td><td>${sh != null && sh !== rl ? '<b style="color:var(--hi)">要確認</b>' : ''}</td></tr>`);
+    });
+  });
+  return `<div class="tbl-wrap"><table><thead><tr><th>シナリオ</th><th>ID</th><th>価格</th><th>グレード</th><th>損失（条件から計算）</th><th>損失（シート）</th><th></th></tr></thead><tbody>${rows.join('')}</tbody></table></div>
+    <p class="mini">「要確認」は、6_攪乱イベントの処理（国際線は日程変更、ホテルは前日取消）で計算した損失と、4_刺激材料の損失列が一致しないプランです。現在の設定：${S.cfg.lossSource === 'sheet' ? 'シートの値を使用' : '条件から計算した値を使用'}。</p>`;
+}
+function logSummary() {
+  const rows = LOG.tasks.map(t => `<tr><td>${t.practice ? '練習' : t.task_no}</td><td>${esc(t.scenario)}</td><td class="mono">${t.plan_chosen || '—'}</td><td>${t.risk_grade_chosen || '—'}</td><td>${t.event_occurred == null ? '—' : t.event_occurred ? '発生' : 'なし'}</td><td class="mono">${t.loss_jpy == null ? '—' : fmtN(t.loss_jpy)}</td><td class="mono">${t.comprehension_score == null ? '—' : t.comprehension_score}</td><td class="mono">${t.alignment_score == null ? '—' : t.alignment_score}</td></tr>`).join('');
+  return `<p class="mini">参加者ID ${esc(S.pid)}・${esc(S.cfg.condition)}・順序${esc(S.cfg.latinOrder)}・記録イベント ${LOG.events.length} 件${LOG.profile ? `・段階 ${LOG.profile.stage}（合成得点 ${LOG.profile.composite}）` : ''}</p>
+    <div class="tbl-wrap"><table><thead><tr><th>課題</th><th>シナリオ</th><th>選択</th><th>グレード</th><th>予定変更</th><th>損失</th><th>理解度</th><th>整合性</th></tr></thead><tbody>${rows || '<tr><td colspan="8">まだ記録がありません</td></tr>'}</tbody></table></div>`;
+}
+function labHTML() {
+  const c = S.cfg;
+  const sel = (id, opts, val) => `<select id="${id}">${opts.map(([v, l]) => `<option value="${esc(v)}"${String(val) === String(v) ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+  const chk = (id, val, label) => `<label class="ctl"><span>${esc(label)}</span><input type="checkbox" id="${id}"${val ? ' checked' : ''}></label>`;
+  const draws = [1, 2, 3].map(n => Object.assign({ n }, eventDraw(S.pid, n, c.pEvent)));
+  return `<div class="lab-backdrop" data-action="lab-close"></div>
+  <aside class="lab" role="dialog" aria-modal="true" aria-labelledby="lab-h">
+    <div class="lab-head"><h2 id="lab-h" tabindex="-1">研究者パネル</h2><span class="spacer"></span><button class="btn quiet small" data-action="lab-close">閉じる</button></div>
+    <div class="lab-body">
+      <section><h3>参加者と実験条件</h3>
+        <label class="ctl"><span>参加者ID</span><input type="text" id="lab-pid" value="${esc(S.pid)}"></label>
+        <label class="ctl"><span>モード</span>${sel('lab-mode', [['demo', 'デモ（研究者・指導教員向け）'], ['exp', '実験（参加者向け）']], c.mode)}</label>
+        <label class="ctl"><span>UI条件</span>${sel('lab-cond', [['C1', 'C1 従来型'], ['C2', 'C2 一律段階表示'], ['C3', 'C3 適応表示']], c.condition)}</label>
+        <label class="ctl"><span>シナリオ順</span>${sel('lab-order', [['A', 'A：国内→国際→ホテル'], ['B', 'B：国際→ホテル→国内'], ['C', 'C：ホテル→国内→国際']], c.latinOrder)}</label>
+        <label class="ctl"><span>C3の段階を固定</span>${sel('lab-stage', [['', '固定しない（回答から算出）'], ['S1', 'S1'], ['S2', 'S2'], ['S3', 'S3'], ['S4', 'S4']], c.stageOverride)}</label>
+        <label class="ctl"><span>段階の境界</span><input type="text" id="lab-cut" value="${c.cutoffs.join(', ')}"><span class="mini">合成得点（1〜7）の境界3つ。パイロットの四分位で更新</span></label>
+        ${chk('lab-flow', c.flowPanel, '情報の行き先パネル（全条件）')}
+        ${chk('lab-rrmap', c.rrMap, 'リスク・リターン図（C2・C3）')}
+        ${chk('lab-consent', c.showConsent, '同意画面を表示')}
+        ${chk('lab-profile', c.showProfile, '事前質問を表示')}
+        ${chk('lab-practice', c.showPractice, '練習課題を表示')}
+        <label class="ctl"><span>損失額の出典</span>${sel('lab-loss', [['rules', '条件とイベント時点から計算（推奨）'], ['sheet', '刺激材料シートの損失列']], c.lossSource)}</label>
+        <label class="ctl"><span>予定変更の確率</span><input type="number" id="lab-p" min="0" max="1" step="0.05" value="${c.pEvent}"></label>
+        <label class="ctl"><span>ログ送信先URL</span><input type="text" class="wide" id="lab-endpoint" value="${esc(c.endpoint)}" placeholder="https://script.google.com/macros/s/…/exec"></label>
+        <label class="ctl"><span>事後アンケートURL</span><input type="text" class="wide" id="lab-post" value="${esc(c.postSurveyUrl)}" placeholder="https://…"></label>
+        <div class="actions"><button class="btn small" data-action="lab-apply">この設定で最初から始める</button><button class="btn quiet small" data-action="lab-url">参加者用URLを作る</button></div>
+        <p class="mini">配布用のHTMLファイルを実験サーバに置いた場合は、URLの <span class="mono">?pid=…&amp;c=C2&amp;order=B&amp;mode=exp</span> でも同じ設定ができます。実験モードではこのパネルのボタンが消えます（URLに <span class="mono">lab=1</span> か <span class="mono">#lab</span> を付けると再表示）。</p>
+      </section>
+      <section><h3>画面へ移動（デモ）</h3>
+        <div class="row">${['PRACTICE', 'DOM', 'INT', 'HOTEL'].map(k => `<button class="btn quiet small" data-action="demo-jump" data-v="${k}">${esc(SCENARIOS[k].label)}の検索結果</button>`).join('')}</div>
+        <p class="mini">現在の条件（${esc(c.condition)}${c.condition === 'C3' ? '・' + esc(c.stageOverride || 'S2') : ''}）で、同意と事前質問を省いて表示します。</p></section>
+      <section><h3>予定変更イベントの再現性（参加者ID ${esc(S.pid)}）</h3>
+        <div class="tbl-wrap"><table><thead><tr><th>課題番号</th><th>seed</th><th>乱数</th><th>判定（p = ${c.pEvent}）</th></tr></thead><tbody>${draws.map(d => `<tr><td>${d.n}</td><td class="mono">${d.seed}</td><td class="mono">${d.rand.toFixed(6)}</td><td>${d.occurred ? '発生' : 'なし'}</td></tr>`).join('')}</tbody></table></div>
+        <p class="mini">seed = FNV-1a(「参加者ID|task課題番号」)、乱数 = mulberry32(seed) の最初の値です。同じIDなら何度計算しても同じ結果になり、ログの event_seed・event_rand と照合できます。判定は選んだプランに依存しません。</p></section>
+      <section><h3>刺激と損失額の確認</h3>${stimTable()}</section>
+      <section><h3>割付表（ブロックランダム化・ブロックサイズ6）</h3>
+        <div class="row"><label class="ctl"><span>人数</span><input type="number" id="lab-n" min="6" max="600" step="6" value="140"></label><label class="ctl"><span>乱数の種</span><input type="text" id="lab-seed" value="study3"></label><label class="ctl"><span>IDの接頭辞</span><input type="text" id="lab-prefix" value="S3-"></label></div>
+        <div class="actions"><button class="btn quiet small" data-action="lab-alloc">割付表を作る</button><button class="btn quiet small" data-action="lab-alloc-copy">CSVをコピー</button><button class="btn quiet small" data-action="lab-alloc-save">CSVを保存</button></div>
+        <div id="lab-alloc-out"></div></section>
+      <section><h3>ログ（この端末・このセッション）</h3>${logSummary()}
+        <div class="actions"><button class="btn quiet small" data-action="lab-copy-csv">CSVをコピー</button><button class="btn quiet small" data-action="lab-copy-json">JSONをコピー</button><button class="btn quiet small" data-action="lab-save-csv">CSVを保存</button><button class="btn quiet small" data-action="lab-save-json">JSONを保存</button>${c.endpoint ? '<button class="btn quiet small" data-action="lab-send">送信テスト</button>' : ''}</div>
+        <textarea class="out" id="labOut" readonly aria-label="書き出し内容">${esc(buildCSV())}</textarea></section>
+    </div>
+  </aside>`;
+}
+
+function readLabConfig() {
+  const g = id => $('#' + id);
+  const cfg = Object.assign({}, S.cfg);
+  cfg.mode = g('lab-mode').value; cfg.condition = g('lab-cond').value; cfg.latinOrder = g('lab-order').value;
+  cfg.stageOverride = g('lab-stage').value;
+  const cut = g('lab-cut').value.split(/[,\s]+/).filter(Boolean).map(Number);
+  if (cut.length === 3 && cut.every(x => !isNaN(x)) && cut[0] < cut[1] && cut[1] < cut[2]) cfg.cutoffs = cut;
+  cfg.flowPanel = g('lab-flow').checked; cfg.rrMap = g('lab-rrmap').checked;
+  cfg.showConsent = g('lab-consent').checked; cfg.showProfile = g('lab-profile').checked; cfg.showPractice = g('lab-practice').checked;
+  cfg.lossSource = g('lab-loss').value;
+  const p = parseFloat(g('lab-p').value); if (!isNaN(p) && p >= 0 && p <= 1) cfg.pEvent = p;
+  const ep = g('lab-endpoint').value.trim(); cfg.endpoint = /^https:\/\//.test(ep) ? ep : '';
+  const ps = g('lab-post').value.trim(); cfg.postSurveyUrl = /^https:\/\//.test(ps) ? ps : '';
+  const pid = g('lab-pid').value.replace(/[^\w\-.@]/g, '').slice(0, 64);
+  return { cfg, pid };
+}
+function participantUrl(cfg, pid) {
+  const base = location.origin && location.origin !== 'null' ? location.origin + location.pathname : '(配布用HTMLのURL)';
+  const q = new URLSearchParams({ pid, c: cfg.condition, order: cfg.latinOrder, mode: 'exp' });
+  if (!cfg.flowPanel) q.set('flow', '0');
+  if (!cfg.rrMap) q.set('rrmap', '0');
+  if (cfg.lossSource !== 'rules') q.set('loss', cfg.lossSource);
+  if (cfg.endpoint) q.set('endpoint', cfg.endpoint);
+  if (cfg.postSurveyUrl) q.set('post', cfg.postSurveyUrl);
+  return `${base}?${q.toString()}`;
+}
+function allocCSV(rows, cfg) {
+  const head = 'slot,participant_id,condition,latin_order,block,url';
+  return [head].concat(rows.map(r => [r.slot, r.participant_id, r.condition, r.latin_order, r.block, csvCell(participantUrl(Object.assign({}, cfg, { condition: r.condition, latinOrder: r.latin_order }), r.participant_id))].join(','))).join('\r\n');
+}
+function makeAlloc() {
+  const n = Math.max(6, Math.min(600, parseInt($('#lab-n').value, 10) || 140));
+  S._alloc = allocationTable(n, $('#lab-seed').value || 'study3', $('#lab-prefix').value || 'S3-');
+  const counts = { C1: 0, C2: 0, C3: 0 };
+  S._alloc.forEach(r => { counts[r.condition]++; });
+  $('#lab-alloc-out').innerHTML = `<p class="mini">${n}名分を作成：C1 ${counts.C1}名・C2 ${counts.C2}名・C3 ${counts.C3}名（先頭12行を表示）</p>
+    <div class="tbl-wrap"><table><thead><tr><th>枠</th><th>参加者ID</th><th>条件</th><th>順序</th><th>ブロック</th></tr></thead><tbody>${S._alloc.slice(0, 12).map(r => `<tr><td>${r.slot}</td><td class="mono">${esc(r.participant_id)}</td><td>${r.condition}</td><td>${r.latin_order}</td><td>${r.block}</td></tr>`).join('')}</tbody></table></div>`;
+  logEv('lab_alloc', { n, seed: $('#lab-seed').value });
+}
+
+function labAction(a, el) {
+  switch (a) {
+    case 'lab-open': return openLab();
+    case 'lab-close': return closeLab();
+    case 'lab-apply': {
+      const { cfg, pid } = readLabConfig();
+      Object.assign(S.cfg, cfg);
+      closeLab();
+      resetSession(pid || randomPid());
+      logEv('lab_apply', { condition: cfg.condition, latin_order: cfg.latinOrder, mode: cfg.mode });
+      toast('設定を適用し、最初から始めます');
+      return go(S.cfg.mode === 'exp' && window.innerWidth < S.cfg.minWidth ? 'narrow' : 'welcome');
+    }
+    case 'lab-url': {
+      const { cfg, pid } = readLabConfig();
+      const url = participantUrl(cfg, pid || S.pid);
+      $('#labOut').value = url;
+      return copyText(url, $('#labOut'));
+    }
+    case 'lab-alloc': return makeAlloc();
+    case 'lab-alloc-copy': if (!S._alloc) makeAlloc(); return copyText(allocCSV(S._alloc, readLabConfig().cfg), $('#labOut'));
+    case 'lab-alloc-save': if (!S._alloc) makeAlloc(); return saveFile('soramado_allocation.csv', allocCSV(S._alloc, readLabConfig().cfg));
+    case 'lab-copy-csv': flushDwell(); return copyText(buildCSV(), $('#labOut'));
+    case 'lab-copy-json': flushDwell(); return copyText(exportJSON(), $('#labOut'));
+    case 'lab-save-csv': flushDwell(); return saveFile(fileStem() + '.csv', buildCSV());
+    case 'lab-save-json': flushDwell(); return saveFile(fileStem() + '.json', exportJSON());
+    case 'lab-send':
+      return sendLog(S.cfg.endpoint, 'lab_test').then(res => toast(res.ok ? '送信しました（受信側で確認してください）' : '送信に失敗しました：' + (res.error || '')));
+    default: return;
+  }
+}
+
+/* ============================================================
+   main.js — 起動
+   ============================================================ */
+function bindEvents() {
+  document.addEventListener('click', onClick);
+  document.addEventListener('change', onChange);
+  document.addEventListener('input', onInput);
+  document.addEventListener('mouseover', onOver);
+  document.addEventListener('mouseout', onOut);
+  document.addEventListener('focusin', onFocusIn);
+  document.addEventListener('focusout', onFocusOut);
+  document.addEventListener('keydown', onKey);
+  // 0〜100のスライダーは、つまみに触れただけ（値が変わらない）でも回答として扱う
+  document.addEventListener('pointerup', e => { if (e.target && e.target.id === 'conf') setConf(e.target.value); });
+  document.addEventListener('keyup', e => { if (e.target && e.target.id === 'conf') setConf(e.target.value); });
+  const save = () => { flushDwell(); persist(); };
+  window.addEventListener('pagehide', save);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') { save(); logEv('hidden'); } else logEv('visible');
+  });
+}
+
+function boot() {
+  const url = readUrlConfig();
+  const pid = url.pid; delete url.pid;
+  Object.assign(S.cfg, url);
+  const hashLab = location.hash === '#lab';
+  if (hashLab) S.cfg.lab = true;
+  S.pid = pid || randomPid();
+  const stored = storeLoad();
+  if (stored && stored.v === 1 && !stored.finished && stored.screen && !['welcome', 'declined', 'narrow', 'resume'].includes(stored.screen) && (!pid || stored.pid === pid)) {
+    S.pendingResume = stored;
+    S.screen = 'resume';
+  }
+  initMeta();
+  if (S.screen !== 'resume' && S.cfg.mode === 'exp' && window.innerWidth < S.cfg.minWidth) {
+    S.screen = 'narrow';
+    logEv('narrow_block', { width: window.innerWidth });
+  }
+  bindEvents();
+  render();
+  initDownloads();
+  if (hashLab) openLab();
+}
+boot();
+
+})();
+</script>
+</body>
+</html>
